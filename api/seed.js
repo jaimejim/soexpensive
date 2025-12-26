@@ -144,9 +144,9 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Add historical prices (7 days for chart visualization)
-    // Reduced to prevent timeout on Vercel serverless
-    for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
+    // Add historical prices (3 days only - minimal for demo)
+    // Absolute minimum to prevent timeout on Vercel serverless
+    for (let daysAgo = 1; daysAgo <= 3; daysAgo++) {
       for (const product of productIds) {
         for (const storeName of stores) {
           const price = generatePrice(product.priceRange[0], product.priceRange[1]);
