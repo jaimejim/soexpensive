@@ -144,55 +144,22 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Add historical prices (30 days instead of 180 for faster seeding)
-    // Batch insert for performance
-    const batchSize = 500;
-    let batch = [];
-
-    for (let daysAgo = 1; daysAgo <= 30; daysAgo++) {
+    // Add historical prices (7 days for chart visualization)
+    // Reduced to prevent timeout on Vercel serverless
+    for (let daysAgo = 1; daysAgo <= 7; daysAgo++) {
       for (const product of productIds) {
         for (const storeName of stores) {
           const price = generatePrice(product.priceRange[0], product.priceRange[1]);
           const timestamp = new Date();
           timestamp.setDate(timestamp.getDate() - daysAgo);
 
-          batch.push({
-            product_id: product.id,
-            store_id: storeIds[storeName],
-            price: price,
-            recorded_at: timestamp.toISOString()
-          });
-
-          // Insert batch when it reaches batchSize
-          if (batch.length >= batchSize) {
-            const values = batch.map(b =>
-              `(${b.product_id}, ${b.store_id}, ${b.price}, '${b.recorded_at}')`
-            ).join(',');
-
-            await db.sql.unsafe(`
-              INSERT INTO prices (product_id, store_id, price, recorded_at)
-              VALUES ${values}
-            `);
-
-            results.historicalPrices += batch.length;
-            batch = [];
-          }
+          await db.sql`
+            INSERT INTO prices (product_id, store_id, price, recorded_at)
+            VALUES (${product.id}, ${storeIds[storeName]}, ${price}, ${timestamp.toISOString()})
+          `;
+          results.historicalPrices++;
         }
       }
-    }
-
-    // Insert remaining batch
-    if (batch.length > 0) {
-      const values = batch.map(b =>
-        `(${b.product_id}, ${b.store_id}, ${b.price}, '${b.recorded_at}')`
-      ).join(',');
-
-      await db.sql.unsafe(`
-        INSERT INTO prices (product_id, store_id, price, recorded_at)
-        VALUES ${values}
-      `);
-
-      results.historicalPrices += batch.length;
     }
 
     res.json({
