@@ -23,13 +23,25 @@ A fast and simple web application to compare prices of Finnish supermarket goods
 ## Tech Stack
 
 - **Backend**: Node.js + Express
-- **Database**: SQLite (better-sqlite3)
+- **Database**: PostgreSQL (Vercel Postgres)
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Charts**: Chart.js (only external library for visualizations)
 
-## 🚀 Quick Deploy to Replit
+## 🚀 Quick Deploy
 
-**Easiest way to get started:**
+### Deploy to Vercel (Recommended)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/jaimejim/soexpensive)
+
+1. Click the button above or go to [vercel.com/new](https://vercel.com/new)
+2. Import this repository
+3. Add Vercel Postgres database (Storage → Create → Postgres)
+4. Deploy!
+5. Run `node seed.js` to populate the database (see [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md))
+
+**See [VERCEL_DEPLOY.md](VERCEL_DEPLOY.md) for complete deployment guide.**
+
+### Deploy to Replit (Alternative)
 
 1. Go to [Replit](https://replit.com)
 2. Click "Create Repl" → "Import from GitHub"
@@ -37,7 +49,7 @@ A fast and simple web application to compare prices of Finnish supermarket goods
 4. Click "Run"
 5. Your app is live!
 
-See [DEPLOY.md](DEPLOY.md) for detailed deployment instructions.
+See [DEPLOY.md](DEPLOY.md) for Replit deployment instructions.
 
 ## Installation
 

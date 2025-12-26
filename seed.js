@@ -1,8 +1,5 @@
 const db = require('./db');
 
-// Initialize database
-db.initDatabase();
-
 // Finnish supermarket stores
 const stores = [
   'S-Market',
@@ -50,7 +47,7 @@ const products = [
   { name: 'Porkkana', category: 'Vegetables', unit: 'kg' },
   { name: 'Suomalainen Peruna', category: 'Vegetables', unit: '2kg' },
   { name: 'Sipuli', category: 'Vegetables', unit: 'kg' },
-  { name: 'Paprika punai', category: 'Vegetables', unit: 'kg' },
+  { name: 'Paprika punainen', category: 'Vegetables', unit: 'kg' },
   { name: 'Salaatti Jäävuori', category: 'Vegetables', unit: 'kpl' },
 
   // Fruits
@@ -111,26 +108,6 @@ const products = [
   { name: 'Dove Suihkusaippua', category: 'Personal Care', unit: '250ml' }
 ];
 
-console.log('Seeding database...');
-
-// Insert stores
-const storeIds = {};
-stores.forEach(storeName => {
-  const stmt = db.db.prepare('INSERT OR IGNORE INTO stores (name) VALUES (?)');
-  const result = stmt.run(storeName);
-  const id = result.lastInsertRowid || db.db.prepare('SELECT id FROM stores WHERE name = ?').get(storeName).id;
-  storeIds[storeName] = id;
-  console.log(`Added store: ${storeName} (ID: ${id})`);
-});
-
-// Insert products
-const productIds = [];
-products.forEach(product => {
-  const result = db.addProduct(product.name, product.category, product.unit);
-  productIds.push(result.lastInsertRowid);
-  console.log(`Added product: ${product.name}`);
-});
-
 // Generate realistic prices for Finnish market
 function generatePrice(category) {
   const priceRanges = {
@@ -155,54 +132,92 @@ function generatePrice(category) {
   return Math.round(price * 100) / 100; // Round to 2 decimals
 }
 
-// Add current prices for all products in all stores
-products.forEach((product, index) => {
-  const productId = productIds[index];
-  stores.forEach(storeName => {
-    const storeId = storeIds[storeName];
-    const basePrice = generatePrice(product.category);
+async function seedDatabase() {
+  try {
+    console.log('Seeding database...');
 
-    // Add small variation between stores (-10% to +15%)
-    const variation = 0.9 + Math.random() * 0.25;
-    const price = Math.round(basePrice * variation * 100) / 100;
+    // Initialize database
+    await db.initDatabase();
 
-    db.addPrice(productId, storeId, price);
-  });
-});
+    // Insert stores
+    const storeIds = {};
+    for (const storeName of stores) {
+      const id = await db.addStore(storeName);
+      storeIds[storeName] = id;
+      console.log(`Added store: ${storeName} (ID: ${id})`);
+    }
 
-console.log('✓ Database seeded successfully!');
-console.log(`✓ Added ${stores.length} stores`);
-console.log(`✓ Added ${products.length} products`);
-console.log(`✓ Added ${products.length * stores.length} price entries`);
+    // Insert products
+    const productIds = [];
+    for (const product of products) {
+      const result = await db.addProduct(product.name, product.category, product.unit);
+      productIds.push(result.lastInsertRowid);
+      console.log(`Added product: ${product.name}`);
+    }
 
-// Add some historical data (simulate price changes over past months)
-console.log('Adding historical price data...');
+    console.log('✓ Database seeded successfully!');
+    console.log(`✓ Added ${stores.length} stores`);
+    console.log(`✓ Added ${products.length} products`);
 
-const monthsAgo = [30, 60, 90, 120, 150, 180]; // 1-6 months ago
+    // Add current prices for all products in all stores
+    let priceCount = 0;
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const productId = productIds[i];
 
-products.forEach((product, index) => {
-  const productId = productIds[index];
+      for (const storeName of stores) {
+        const storeId = storeIds[storeName];
+        const basePrice = generatePrice(product.category);
 
-  monthsAgo.forEach(daysAgo => {
-    stores.forEach(storeName => {
-      const storeId = storeIds[storeName];
-      const basePrice = generatePrice(product.category);
+        // Add small variation between stores (-10% to +15%)
+        const variation = 0.9 + Math.random() * 0.25;
+        const price = Math.round(basePrice * variation * 100) / 100;
 
-      // Simulate price inflation over time (prices were slightly lower before)
-      const inflationFactor = 1 - (daysAgo / 365) * 0.05; // ~5% annual increase
-      const variation = 0.9 + Math.random() * 0.25;
-      const price = Math.round(basePrice * variation * inflationFactor * 100) / 100;
+        await db.addPrice(productId, storeId, price);
+        priceCount++;
+      }
+    }
 
-      // Insert with historical date
-      const stmt = db.db.prepare(
-        `INSERT INTO prices (product_id, store_id, price, recorded_at) VALUES (?, ?, ?, datetime('now', '-${daysAgo} days'))`
-      );
-      stmt.run(productId, storeId, price);
-    });
-  });
-});
+    console.log(`✓ Added ${priceCount} current price entries`);
 
-console.log('✓ Historical data added!');
-console.log('✓ Database is ready to use');
+    // Add historical data (simulate price changes over past months)
+    console.log('Adding historical price data...');
+    const monthsAgo = [30, 60, 90, 120, 150, 180]; // 1-6 months ago
 
-process.exit(0);
+    let historicalCount = 0;
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const productId = productIds[i];
+
+      for (const daysAgo of monthsAgo) {
+        for (const storeName of stores) {
+          const storeId = storeIds[storeName];
+          const basePrice = generatePrice(product.category);
+
+          // Simulate price inflation over time (prices were slightly lower before)
+          const inflationFactor = 1 - (daysAgo / 365) * 0.05; // ~5% annual increase
+          const variation = 0.9 + Math.random() * 0.25;
+          const price = Math.round(basePrice * variation * inflationFactor * 100) / 100;
+
+          // Insert with historical date
+          await db.sql`
+            INSERT INTO prices (product_id, store_id, price, recorded_at)
+            VALUES (${productId}, ${storeId}, ${price}, NOW() - INTERVAL '${daysAgo} days')
+          `;
+          historicalCount++;
+        }
+      }
+    }
+
+    console.log(`✓ Added ${historicalCount} historical price entries`);
+    console.log('✓ Database is ready to use');
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Error seeding database:', error);
+    process.exit(1);
+  }
+}
+
+// Run seed
+seedDatabase();
