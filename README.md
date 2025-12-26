@@ -27,6 +27,18 @@ A fast and simple web application to compare prices of Finnish supermarket goods
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **Charts**: Chart.js (only external library for visualizations)
 
+## 🚀 Quick Deploy to Replit
+
+**Easiest way to get started:**
+
+1. Go to [Replit](https://replit.com)
+2. Click "Create Repl" → "Import from GitHub"
+3. Paste this repository URL
+4. Click "Run"
+5. Your app is live!
+
+See [DEPLOY.md](DEPLOY.md) for detailed deployment instructions.
+
 ## Installation
 
 1. Clone the repository

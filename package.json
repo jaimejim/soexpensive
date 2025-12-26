@@ -4,8 +4,9 @@
   "description": "Finnish supermarket price comparison web application",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node init.js && node server.js",
+    "dev": "node server.js",
+    "seed": "node seed.js"
   },
   "keywords": ["price", "comparison", "supermarket", "finland"],
   "author": "",
