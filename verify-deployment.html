@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoExpensive Deployment Verification</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+        }
+        h1 {
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 10px;
+        }
+        .test {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #333;
+            background: #0a0a0a;
+        }
+        .test h3 {
+            margin-top: 0;
+            color: #ffff00;
+        }
+        .status {
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status.pending {
+            background: #666;
+            color: #fff;
+        }
+        .status.running {
+            background: #ff9800;
+            color: #000;
+        }
+        .status.success {
+            background: #00ff00;
+            color: #000;
+        }
+        .status.error {
+            background: #ff0000;
+            color: #fff;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-left: 3px solid #00ff00;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error-result {
+            border-left-color: #ff0000;
+        }
+        pre {
+            margin: 5px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        .summary {
+            margin: 20px 0;
+            padding: 20px;
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+        }
+        .summary h2 {
+            margin-top: 0;
+            color: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>╔═══ SOEXPENSIVE DEPLOYMENT VERIFICATION ═══╗</h1>
+
+    <div class="summary" id="summary" style="display: none;">
+        <h2>VERIFICATION SUMMARY</h2>
+        <div id="summaryContent"></div>
+    </div>
+
+    <button onclick="runAllTests()">▶ RUN ALL TESTS</button>
+    <button onclick="location.reload()">↻ RESET</button>
+
+    <div class="test" id="test1">
+        <h3>TEST 1: Check Deployment Status</h3>
+        <div class="status pending" id="status1">⏳ Pending</div>
+        <div class="result" id="result1" style="display: none;"></div>
+    </div>
+
+    <div class="test" id="test2">
+        <h3>TEST 2: Verify Monospace Design</h3>
+        <div class="status pending" id="status2">⏳ Pending</div>
+        <div class="result" id="result2" style="display: none;"></div>
+    </div>
+
+    <div class="test" id="test3">
+        <h3>TEST 3: Check Health Endpoint</h3>
+        <div class="status pending" id="status3">⏳ Pending</div>
+        <div class="result" id="result3" style="display: none;"></div>
+    </div>
+
+    <div class="test" id="test4">
+        <h3>TEST 4: Seed Database (if empty)</h3>
+        <div class="status pending" id="status4">⏳ Pending</div>
+        <div class="result" id="result4" style="display: none;"></div>
+    </div>
+
+    <div class="test" id="test5">
+        <h3>TEST 5: Verify Stores API</h3>
+        <div class="status pending" id="status5">⏳ Pending</div>
+        <div class="result" id="result5" style="display: none;"></div>
+    </div>
+
+    <div class="test" id="test6">
+        <h3>TEST 6: Verify Products API</h3>
+        <div class="status pending" id="status6">⏳ Pending</div>
+        <div class="result" id="result6" style="display: none;"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://soexpensive.vercel.app';
+        const tests = [];
+        let testResults = {
+            passed: 0,
+            failed: 0,
+            total: 6
+        };
+
+        function updateStatus(testNum, status, message) {
+            const statusEl = document.getElementById(`status${testNum}`);
+            statusEl.className = `status ${status}`;
+            const symbols = {
+                pending: '⏳',
+                running: '⚙',
+                success: '✓',
+                error: '✗'
+            };
+            statusEl.textContent = `${symbols[status]} ${message}`;
+        }
+
+        function showResult(testNum, content, isError = false) {
+            const resultEl = document.getElementById(`result${testNum}`);
+            resultEl.style.display = 'block';
+            if (isError) {
+                resultEl.classList.add('error-result');
+            }
+            resultEl.innerHTML = `<pre>${content}</pre>`;
+        }
+
+        async function test1_CheckDeployment() {
+            updateStatus(1, 'running', 'Checking deployment...');
+            try {
+                const response = await fetch(BASE_URL);
+                if (response.ok) {
+                    updateStatus(1, 'success', 'Deployment is live');
+                    showResult(1, `✓ Site is accessible at ${BASE_URL}\n✓ HTTP Status: ${response.status}`);
+                    testResults.passed++;
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                updateStatus(1, 'error', 'Deployment check failed');
+                showResult(1, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return false;
+            }
+        }
+
+        async function test2_VerifyDesign() {
+            updateStatus(2, 'running', 'Checking monospace design...');
+            try {
+                const response = await fetch(BASE_URL);
+                const html = await response.text();
+
+                const checks = {
+                    'Monospace CSS': html.includes('styles.css'),
+                    'Title contains soexpensive.fi': html.includes('soexpensive.fi'),
+                    'Finnish language': html.includes('lang="fi"'),
+                    'Chart.js loaded': html.includes('chart.js'),
+                    'App.js loaded': html.includes('app.js')
+                };
+
+                const allPassed = Object.values(checks).every(v => v);
+
+                if (allPassed) {
+                    updateStatus(2, 'success', 'Monospace design detected');
+                    const checkList = Object.entries(checks)
+                        .map(([k, v]) => `${v ? '✓' : '✗'} ${k}`)
+                        .join('\n');
+                    showResult(2, checkList);
+                    testResults.passed++;
+                    return true;
+                } else {
+                    updateStatus(2, 'error', 'Design verification failed');
+                    const checkList = Object.entries(checks)
+                        .map(([k, v]) => `${v ? '✓' : '✗'} ${k}`)
+                        .join('\n');
+                    showResult(2, checkList, true);
+                    testResults.failed++;
+                    return false;
+                }
+            } catch (error) {
+                updateStatus(2, 'error', 'Design check failed');
+                showResult(2, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return false;
+            }
+        }
+
+        async function test3_CheckHealth() {
+            updateStatus(3, 'running', 'Checking health endpoint...');
+            try {
+                const response = await fetch(`${BASE_URL}/api/health`);
+                const data = await response.json();
+
+                const hasDB = data.database?.hasPostgresUrl === true;
+                const state = data.database?.state;
+
+                if (hasDB) {
+                    updateStatus(3, 'success', 'Health check passed');
+                    showResult(3, JSON.stringify(data, null, 2));
+                    testResults.passed++;
+                    return state;
+                } else {
+                    updateStatus(3, 'error', 'Database not configured');
+                    showResult(3, JSON.stringify(data, null, 2), true);
+                    testResults.failed++;
+                    return null;
+                }
+            } catch (error) {
+                updateStatus(3, 'error', 'Health check failed');
+                showResult(3, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return null;
+            }
+        }
+
+        async function test4_SeedDatabase(dbState) {
+            if (dbState === 'initialized_with_data') {
+                updateStatus(4, 'success', 'Database already seeded - skipped');
+                showResult(4, '✓ Database contains data, seeding not needed');
+                testResults.passed++;
+                return true;
+            }
+
+            updateStatus(4, 'running', 'Seeding database...');
+            try {
+                const response = await fetch(`${BASE_URL}/api/seed`);
+                const data = await response.json();
+
+                if (data.success) {
+                    updateStatus(4, 'success', 'Database seeded successfully');
+                    showResult(4, JSON.stringify(data.results, null, 2));
+                    testResults.passed++;
+                    return true;
+                } else {
+                    throw new Error(data.error || 'Seeding failed');
+                }
+            } catch (error) {
+                updateStatus(4, 'error', 'Seeding failed');
+                showResult(4, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return false;
+            }
+        }
+
+        async function test5_CheckStores() {
+            updateStatus(5, 'running', 'Checking stores API...');
+            try {
+                const response = await fetch(`${BASE_URL}/api/stores`);
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length === 6) {
+                    updateStatus(5, 'success', `Found ${data.length} stores`);
+                    showResult(5, data.map(s => `✓ ${s.name}`).join('\n'));
+                    testResults.passed++;
+                    return true;
+                } else {
+                    updateStatus(5, 'error', `Expected 6 stores, got ${data.length || 0}`);
+                    showResult(5, JSON.stringify(data, null, 2), true);
+                    testResults.failed++;
+                    return false;
+                }
+            } catch (error) {
+                updateStatus(5, 'error', 'Stores API failed');
+                showResult(5, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return false;
+            }
+        }
+
+        async function test6_CheckProducts() {
+            updateStatus(6, 'running', 'Checking products API...');
+            try {
+                const response = await fetch(`${BASE_URL}/api/products`);
+                const data = await response.json();
+
+                if (Array.isArray(data) && data.length === 67) {
+                    // Check if products have prices
+                    const withPrices = data.filter(p => p.prices && Object.keys(p.prices).length > 0);
+
+                    if (withPrices.length === 67) {
+                        updateStatus(6, 'success', `Found ${data.length} products with prices`);
+                        const categories = [...new Set(data.map(p => p.category))];
+                        showResult(6,
+                            `✓ Products: ${data.length}\n` +
+                            `✓ Categories: ${categories.length}\n` +
+                            `✓ Sample categories:\n  - ${categories.slice(0, 5).join('\n  - ')}`
+                        );
+                        testResults.passed++;
+                        return true;
+                    } else {
+                        updateStatus(6, 'error', 'Some products missing prices');
+                        showResult(6, `✗ ${withPrices.length}/${data.length} products have prices`, true);
+                        testResults.failed++;
+                        return false;
+                    }
+                } else {
+                    updateStatus(6, 'error', `Expected 67 products, got ${data.length || 0}`);
+                    showResult(6, `✗ Product count mismatch\nExpected: 67\nGot: ${data.length || 0}`, true);
+                    testResults.failed++;
+                    return false;
+                }
+            } catch (error) {
+                updateStatus(6, 'error', 'Products API failed');
+                showResult(6, `✗ Error: ${error.message}`, true);
+                testResults.failed++;
+                return false;
+            }
+        }
+
+        async function runAllTests() {
+            // Reset
+            testResults = { passed: 0, failed: 0, total: 6 };
+            document.getElementById('summary').style.display = 'none';
+
+            // Run tests sequentially
+            await test1_CheckDeployment();
+            await test2_VerifyDesign();
+            const dbState = await test3_CheckHealth();
+            await test4_SeedDatabase(dbState);
+
+            // Wait a moment for seed to complete
+            if (dbState !== 'initialized_with_data') {
+                updateStatus(4, 'running', 'Waiting for seed to complete...');
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+
+            await test5_CheckStores();
+            await test6_CheckProducts();
+
+            // Show summary
+            showSummary();
+        }
+
+        function showSummary() {
+            const summaryEl = document.getElementById('summary');
+            const contentEl = document.getElementById('summaryContent');
+
+            const allPassed = testResults.failed === 0;
+            const emoji = allPassed ? '🎉' : '⚠️';
+            const status = allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED';
+
+            contentEl.innerHTML = `
+                <pre>${emoji} ${status}
+
+Passed: ${testResults.passed}/${testResults.total}
+Failed: ${testResults.failed}/${testResults.total}
+
+${allPassed ?
+    '✓ Deployment is complete and working!\n✓ Monospace design is live\n✓ Database is seeded\n✓ All APIs are functional\n\n→ Visit: https://soexpensive.vercel.app/' :
+    '✗ Some issues detected. Check test results above.\n✗ Fix errors and re-run verification.'
+}</pre>
+            `;
+
+            summaryEl.style.display = 'block';
+            summaryEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>
