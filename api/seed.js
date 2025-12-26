@@ -144,23 +144,9 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Add historical prices (3 days only - minimal for demo)
-    // Absolute minimum to prevent timeout on Vercel serverless
-    for (let daysAgo = 1; daysAgo <= 3; daysAgo++) {
-      for (const product of productIds) {
-        for (const storeName of stores) {
-          const price = generatePrice(product.priceRange[0], product.priceRange[1]);
-          const timestamp = new Date();
-          timestamp.setDate(timestamp.getDate() - daysAgo);
-
-          await db.sql`
-            INSERT INTO prices (product_id, store_id, price, recorded_at)
-            VALUES (${product.id}, ${storeIds[storeName]}, ${price}, ${timestamp.toISOString()})
-          `;
-          results.historicalPrices++;
-        }
-      }
-    }
+    // Skip historical prices to prevent timeout
+    // Only current prices are seeded for now
+    results.historicalPrices = 0;
 
     res.json({
       success: true,
