@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Seeding - SoExpensive</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.loading {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        .results {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .results div {
+            margin: 5px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .link {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e7f3ff;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 Database Seeding</h1>
+        <p class="subtitle">Populate the database with Finnish supermarket data</p>
+
+        <div id="status" class="status loading" style="display: none;">
+            <div class="spinner"></div>
+            <span id="statusText">Initializing...</span>
+        </div>
+
+        <div id="results" class="results" style="display: none;"></div>
+
+        <button id="seedBtn" onclick="seedDatabase()">Start Seeding</button>
+
+        <div class="link" id="successLink" style="display: none;">
+            <p>✅ Seeding complete!</p>
+            <a href="/" target="_blank">View the Application →</a>
+        </div>
+    </div>
+
+    <script>
+        async function seedDatabase() {
+            const btn = document.getElementById('seedBtn');
+            const status = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            const results = document.getElementById('results');
+            const successLink = document.getElementById('successLink');
+
+            // Disable button
+            btn.disabled = true;
+            btn.textContent = 'Seeding...';
+
+            // Show loading status
+            status.style.display = 'block';
+            status.className = 'status loading';
+            statusText.textContent = 'Connecting to database and seeding data...';
+            results.style.display = 'none';
+            successLink.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/seed');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Success
+                    status.className = 'status success';
+                    statusText.textContent = '✅ Database seeded successfully!';
+
+                    // Show results
+                    results.style.display = 'block';
+                    results.innerHTML = `
+                        <div><strong>Seeding Results:</strong></div>
+                        <div>✓ Stores added: ${data.results.stores}</div>
+                        <div>✓ Products added: ${data.results.products}</div>
+                        <div>✓ Current prices: ${data.results.currentPrices}</div>
+                        <div>✓ Historical prices: ${data.results.historicalPrices}</div>
+                        <div style="margin-top: 15px; color: #28a745;">
+                            <strong>Total: ${data.results.currentPrices + data.results.historicalPrices} price entries</strong>
+                        </div>
+                    `;
+
+                    // Show link
+                    successLink.style.display = 'block';
+
+                    // Update button
+                    btn.textContent = 'Seed Again';
+                    btn.disabled = false;
+                } else {
+                    throw new Error(data.error || 'Seeding failed');
+                }
+            } catch (error) {
+                // Error
+                status.className = 'status error';
+                statusText.textContent = '❌ Error: ' + error.message;
+
+                // Show error details
+                results.style.display = 'block';
+                results.innerHTML = `
+                    <div><strong>Error Details:</strong></div>
+                    <div>${error.message}</div>
+                    <div style="margin-top: 10px; color: #721c24;">
+                        Please check the deployment logs or try again.
+                    </div>
+                `;
+
+                // Re-enable button
+                btn.textContent = 'Retry Seeding';
+                btn.disabled = false;
+            }
+        }
+
+        // Auto-start seeding on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('seedBtn').click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
