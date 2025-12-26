@@ -6,9 +6,32 @@ let currentChart = null;
 // Store names in order
 const STORE_ORDER = ['S-Market', 'Prisma', 'K-Citymarket', 'K-Supermarket', 'Lidl', 'Alepa'];
 
+// Theme management
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeButton(newTheme);
+}
+
+function updateThemeButton(theme) {
+    const themeText = document.getElementById('themeText');
+    themeText.textContent = theme === 'dark' ? 'light mode' : 'dark mode';
+}
+
 // Initialize app
 async function init() {
     try {
+        // Initialize theme
+        initTheme();
+
         // Fetch stores and products
         await Promise.all([
             fetchStores(),
@@ -21,6 +44,8 @@ async function init() {
         // Initial render
         renderProducts();
         updateSummary();
+        updateStoreComparison();
+        updateMetadata();
     } catch (error) {
         console.error('Initialization error:', error);
         document.getElementById('loading').textContent = 'Error loading data. Please refresh the page.';
@@ -59,6 +84,9 @@ function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('input', debounce(renderProducts, 300));
     document.getElementById('categoryFilter').addEventListener('change', renderProducts);
     document.getElementById('sortBy').addEventListener('change', renderProducts);
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
     // Modal close
     document.getElementById('modalClose').addEventListener('click', closeModal);
@@ -222,6 +250,63 @@ function updateSummary() {
             Cheapest for ${cheapestOverall[1]} products
         </div>
     `;
+}
+
+// Update store comparison table
+function updateStoreComparison() {
+    const tbody = document.getElementById('storeComparisonBody');
+
+    // Calculate stats for each store
+    const storeStats = STORE_ORDER.map(store => {
+        let cheapestCount = 0;
+        let totalPrice = 0;
+        let priceCount = 0;
+
+        allProducts.forEach(product => {
+            const priceData = product.prices[store];
+            if (priceData && priceData.price !== null) {
+                totalPrice += priceData.price;
+                priceCount++;
+
+                if (getCheapestStore(product) === store) {
+                    cheapestCount++;
+                }
+            }
+        });
+
+        const avgPrice = priceCount > 0 ? totalPrice / priceCount : 0;
+
+        return {
+            name: store,
+            cheapestCount,
+            avgPrice,
+            priceCount
+        };
+    });
+
+    // Sort by cheapest count (descending)
+    storeStats.sort((a, b) => b.cheapestCount - a.cheapestCount);
+
+    // Render table
+    tbody.innerHTML = storeStats.map((store, index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+
+        return `
+            <tr>
+                <td><strong>${store.name}</strong></td>
+                <td>${store.cheapestCount}</td>
+                <td>€${store.avgPrice.toFixed(2)}</td>
+                <td class="${rankClass}">#${rank}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Update metadata
+function updateMetadata() {
+    document.getElementById('metaProducts').textContent = `${allProducts.length} products tracked`;
+    document.getElementById('metaLastUpdate').textContent = new Date().toLocaleDateString('fi-FI');
 }
 
 // Show price history modal

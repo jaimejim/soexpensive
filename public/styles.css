@@ -9,6 +9,7 @@
     box-sizing: border-box;
 }
 
+/* Light theme (default) */
 :root {
     --bg: #fefefe;
     --fg: #1a1a1a;
@@ -17,7 +18,22 @@
     --border: #d0d0d0;
     --highlight: #f0f8f7;
     --green: #2a9d8f;
+    --red: #e76f51;
+    --table-bg: #fafafa;
     --char-width: 0.6em;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+    --bg: #1a1a1a;
+    --fg: #e0e0e0;
+    --accent: #4ecdc4;
+    --muted: #999999;
+    --border: #404040;
+    --highlight: #2a2a2a;
+    --green: #4ecdc4;
+    --red: #ff6b6b;
+    --table-bg: #222222;
 }
 
 body {
@@ -26,11 +42,12 @@ body {
     line-height: 1.6;
     background: var(--bg);
     color: var(--fg);
-    max-width: 100ch;
+    max-width: 140ch;
     margin: 0 auto;
     padding: 2ch;
     -webkit-font-smoothing: auto;
     -moz-osx-font-smoothing: auto;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* ═══ Typography ═══ */
@@ -53,6 +70,71 @@ a {
 
 a:hover {
     background: var(--highlight);
+}
+
+/* ═══ Theme Toggle ═══ */
+.theme-toggle {
+    position: fixed;
+    top: 2ch;
+    right: 2ch;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.5ch 2ch;
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--fg);
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+    background: var(--highlight);
+    border-color: var(--accent);
+}
+
+.theme-toggle::before {
+    content: '[ ';
+}
+
+.theme-toggle::after {
+    content: ' ]';
+}
+
+/* ═══ Metadata Table ═══ */
+.metadata-table {
+    border: 1px solid var(--border);
+    margin-bottom: 3ch;
+    background: var(--table-bg);
+}
+
+.metadata-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.metadata-table td {
+    padding: 0.5ch 2ch;
+    border: none;
+    border-bottom: 1px dotted var(--border);
+}
+
+.metadata-table td:first-child {
+    font-weight: bold;
+    width: 20ch;
+    color: var(--muted);
+}
+
+.metadata-table tr:last-child td {
+    border-bottom: none;
+}
+
+.metadata-table .title {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--accent);
+    padding: 1ch 2ch;
+    border-bottom: 2px solid var(--border);
 }
 
 /* ═══ Header ═══ */
@@ -275,6 +357,51 @@ tbody tr:hover {
 
 .no-price::after {
     content: ']';
+}
+
+/* ═══ Store Comparison Table ═══ */
+.store-comparison {
+    margin: 3ch 0;
+    border: 1px solid var(--border);
+    padding: 2ch;
+    background: var(--bg);
+}
+
+.store-comparison h2 {
+    margin: 0 0 2ch 0;
+}
+
+.store-comparison h2::before {
+    content: '╔═ STORE COMPARISON ';
+}
+
+.store-comparison h2::after {
+    content: '══════════════════════════════════╗';
+}
+
+.store-comparison table {
+    width: 100%;
+}
+
+.store-comparison th {
+    background: var(--table-bg);
+}
+
+.store-comparison .rank-1 {
+    color: var(--green);
+    font-weight: bold;
+}
+
+.store-comparison .rank-1::before {
+    content: '★ ';
+}
+
+.store-comparison .rank-2 {
+    color: var(--accent);
+}
+
+.store-comparison .rank-3 {
+    color: var(--muted);
 }
 
 /* ═══ Loading ═══ */
