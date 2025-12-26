@@ -9,13 +9,38 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Initialize database (async)
+// Database initialization state
 let dbInitialized = false;
-db.initDatabase().then(() => {
-  dbInitialized = true;
-  console.log('Database ready');
-}).catch(err => {
-  console.error('Database initialization failed:', err);
+let dbInitPromise = null;
+
+// Initialize database only when needed and only once
+async function ensureDbInitialized() {
+  if (dbInitialized) return true;
+
+  if (!dbInitPromise) {
+    dbInitPromise = db.initDatabase()
+      .then(() => {
+        dbInitialized = true;
+        console.log('Database ready');
+        return true;
+      })
+      .catch(err => {
+        console.error('Database initialization failed:', err);
+        dbInitPromise = null; // Reset so it can retry
+        throw err;
+      });
+  }
+
+  return dbInitPromise;
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    dbInitialized,
+    hasPostgresUrl: !!process.env.POSTGRES_URL
+  });
 });
 
 // API Routes
@@ -23,6 +48,7 @@ db.initDatabase().then(() => {
 // Get all products with their latest prices
 app.get('/api/products', async (req, res) => {
   try {
+    await ensureDbInitialized();
     const products = await db.getProductsWithPrices();
 
     // Group by product
@@ -55,6 +81,7 @@ app.get('/api/products', async (req, res) => {
 // Get price history for a specific product
 app.get('/api/products/:id/history', async (req, res) => {
   try {
+    await ensureDbInitialized();
     const history = await db.getPriceHistory(req.params.id);
     res.json(history.map(h => ({
       ...h,
@@ -69,6 +96,7 @@ app.get('/api/products/:id/history', async (req, res) => {
 // Get all stores
 app.get('/api/stores', async (req, res) => {
   try {
+    await ensureDbInitialized();
     const stores = await db.getStores();
     res.json(stores);
   } catch (error) {
@@ -80,6 +108,7 @@ app.get('/api/stores', async (req, res) => {
 // Add a new price entry
 app.post('/api/prices', async (req, res) => {
   try {
+    await ensureDbInitialized();
     const { product_id, store_id, price } = req.body;
     const result = await db.addPrice(product_id, store_id, price);
     res.json({ success: true, id: result.lastInsertRowid });
@@ -92,6 +121,7 @@ app.post('/api/prices', async (req, res) => {
 // Get product details
 app.get('/api/products/:id', async (req, res) => {
   try {
+    await ensureDbInitialized();
     const product = await db.getProduct(req.params.id);
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
@@ -103,11 +133,16 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
+// Serve index.html for all other routes (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Export for Vercel
 module.exports = app;
 
 // Start server only if not in serverless environment
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
