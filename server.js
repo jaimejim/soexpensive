@@ -17,6 +17,11 @@ let dbInitPromise = null;
 async function ensureDbInitialized() {
   if (dbInitialized) return true;
 
+  // Check if POSTGRES_URL is configured
+  if (!process.env.POSTGRES_URL) {
+    throw new Error('Database not configured. Please add PostgreSQL database in Vercel dashboard.');
+  }
+
   if (!dbInitPromise) {
     dbInitPromise = db.initDatabase()
       .then(() => {
@@ -35,11 +40,27 @@ async function ensureDbInitialized() {
 }
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const hasPostgresUrl = !!process.env.POSTGRES_URL;
+  let dbCheck = 'not_initialized';
+
+  if (hasPostgresUrl) {
+    try {
+      await ensureDbInitialized();
+      const hasData = await db.isDatabaseInitialized();
+      dbCheck = hasData ? 'initialized_with_data' : 'initialized_empty';
+    } catch (error) {
+      dbCheck = 'error: ' + error.message;
+    }
+  }
+
   res.json({
     status: 'ok',
-    dbInitialized,
-    hasPostgresUrl: !!process.env.POSTGRES_URL
+    database: {
+      hasPostgresUrl,
+      state: dbCheck
+    },
+    timestamp: new Date().toISOString()
   });
 });
 
