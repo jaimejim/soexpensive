@@ -61,7 +61,7 @@ function setupEventListeners() {
     document.getElementById('sortBy').addEventListener('change', renderProducts);
 
     // Modal close
-    document.querySelector('.close').addEventListener('click', closeModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('historyModal');
         if (e.target === modal) {

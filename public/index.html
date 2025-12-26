@@ -3,103 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SoExpensive - Finnish Supermarket Price Comparison</title>
+    <title>soexpensive.fi - Finnish supermarket price comparison</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>💰 SoExpensive</h1>
-            <p class="tagline">Compare Finnish supermarket prices instantly</p>
-        </div>
+        <h1>soexpensive.fi</h1>
+        <p class="tagline">Finnish supermarket price comparison tool</p>
     </header>
 
-    <main class="container">
-        <!-- Summary Section -->
+    <main>
+        <!-- Summary Stats -->
         <section class="summary" id="summary">
             <div class="summary-card">
                 <h3>Total Products</h3>
-                <p class="summary-value" id="totalProducts">-</p>
+                <div class="summary-value" id="totalProducts">--</div>
             </div>
             <div class="summary-card">
-                <h3>Stores</h3>
-                <p class="summary-value" id="totalStores">-</p>
+                <h3>Stores Tracked</h3>
+                <div class="summary-value" id="totalStores">--</div>
             </div>
             <div class="summary-card">
                 <h3>Cheapest Overall</h3>
-                <p class="summary-value" id="cheapestStore">-</p>
+                <div class="summary-value" id="cheapestStore">--</div>
             </div>
         </section>
 
         <!-- Filters -->
         <section class="filters">
-            <div class="filter-group">
-                <label for="searchInput">Search Products:</label>
-                <input type="text" id="searchInput" placeholder="Search by product name...">
-            </div>
-            <div class="filter-group">
-                <label for="categoryFilter">Category:</label>
-                <select id="categoryFilter">
-                    <option value="">All Categories</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="sortBy">Sort By:</label>
-                <select id="sortBy">
-                    <option value="name">Name</option>
-                    <option value="category">Category</option>
-                    <option value="price-low">Price (Low to High)</option>
-                    <option value="price-high">Price (High to Low)</option>
-                    <option value="variance">Price Variance</option>
-                </select>
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label for="searchInput">Search</label>
+                    <input type="text" id="searchInput" placeholder="product name...">
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category</label>
+                    <select id="categoryFilter">
+                        <option value="">all</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sortBy">Sort</label>
+                    <select id="sortBy">
+                        <option value="name">name</option>
+                        <option value="category">category</option>
+                        <option value="price-low">price (low→high)</option>
+                        <option value="price-high">price (high→low)</option>
+                    </select>
+                </div>
             </div>
         </section>
 
-        <!-- Loading indicator -->
-        <div id="loading" class="loading">Loading products...</div>
+        <!-- Loading -->
+        <div id="loading" class="loading">Loading data...</div>
 
         <!-- Products Table -->
         <section class="products-section">
-            <table class="products-table" id="productsTable">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Category</th>
-                        <th>Unit</th>
-                        <th class="store-column" data-store="S-Market">S-Market</th>
-                        <th class="store-column" data-store="Prisma">Prisma</th>
-                        <th class="store-column" data-store="K-Citymarket">K-Citymarket</th>
-                        <th class="store-column" data-store="K-Supermarket">K-Supermarket</th>
-                        <th class="store-column" data-store="Lidl">Lidl</th>
-                        <th class="store-column" data-store="Alepa">Alepa</th>
-                        <th>Best Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productsTableBody">
-                    <!-- Products will be inserted here -->
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Price History Modal -->
-        <div id="historyModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2 id="modalProductName">Price History</h2>
-                <div class="chart-container">
-                    <canvas id="priceChart"></canvas>
-                </div>
+            <h2>Products</h2>
+            <div class="products-table-container">
+                <table id="productsTable">
+                    <thead>
+                        <tr>
+                            <th>PRODUCT</th>
+                            <th>CATEGORY</th>
+                            <th>UNIT</th>
+                            <th>S-MARKET</th>
+                            <th>PRISMA</th>
+                            <th>K-CITY</th>
+                            <th>K-SUPER</th>
+                            <th>LIDL</th>
+                            <th>ALEPA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Products inserted by JavaScript -->
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </section>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 SoExpensive - Finnish Supermarket Price Comparison</p>
-            <p class="footer-note">Sample data for demonstration purposes</p>
+    <!-- Price History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalProductName">Price History</h2>
+                <button class="modal-close" id="modalClose">ESC</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
         </div>
-    </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>
