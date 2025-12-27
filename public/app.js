@@ -7,6 +7,8 @@ let currentChart = null;
 const STORE_ORDER = ['S-Market', 'Prisma', 'K-Citymarket', 'K-Supermarket', 'Lidl', 'Alepa'];
 
 // Theme management
+let currentTheme = 'light';
+
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
 
@@ -20,16 +22,14 @@ function initTheme() {
 }
 
 function toggleTheme() {
-    const root = document.documentElement;
-    const currentIsDark = root.style.getPropertyValue('--text-color') === '#fff';
-    const newTheme = currentIsDark ? 'light' : 'dark';
-
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme', newTheme);
     applyTheme(newTheme);
 }
 
 function applyTheme(theme) {
     const root = document.documentElement;
+    currentTheme = theme;
 
     if (theme === 'dark') {
         root.style.setProperty('--text-color', '#fff');
@@ -48,7 +48,9 @@ function applyTheme(theme) {
 
 function updateThemeButton(theme) {
     const themeIcon = document.getElementById('themeIcon');
-    themeIcon.textContent = theme === 'dark' ? '☑' : '☐';
+    if (themeIcon) {
+        themeIcon.textContent = theme === 'dark' ? '☑' : '☐';
+    }
 }
 
 // Initialize app
