@@ -45,6 +45,7 @@ body {
     color: var(--text-color-alt);
     text-align: right;
     white-space: nowrap;
+    min-height: 20px;
 }
 
 .header-left {
@@ -60,6 +61,7 @@ body {
     justify-content: center;
     padding: var(--space-3);
     background: var(--background-color-alt);
+    min-height: 200px;
 }
 
 .site-title {
@@ -107,6 +109,7 @@ body {
     font-size: 1.5rem;
     font-weight: var(--font-weight-bold);
     color: var(--text-color);
+    min-height: 1.8rem;
 }
 
 /* ═══ 3. Section Headers ═══ */
@@ -247,11 +250,21 @@ hr {
 
 .chart-figure {
     margin: 0;
+    min-height: 400px;
 }
 
 .chart-table {
     display: flex;
     align-items: start;
+    min-height: 300px;
+}
+
+figcaption {
+    min-height: 20px;
+}
+
+.products-section {
+    min-height: 500px;
 }
 
 /* ═══ 10. Responsive ═══ */
