@@ -237,7 +237,7 @@ function generateASCIIChart(storeStats) {
     chart += '\n';
 
     // Add labels centered below each bar
-    const firstBarOffset = 6; // Account for "    └─"
+    const firstBarOffset = 3; // Aligned 3 chars to the left
     chart += ' '.repeat(firstBarOffset);
 
     storeStats.forEach((store, index) => {
