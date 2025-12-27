@@ -201,20 +201,20 @@ module.exports = async (req, res) => {
       results.products++;
     }
 
-    // Add current prices using batch insert for speed
-    const priceValues = [];
+    // Add current prices - using Promise.all for parallel inserts
+    const pricePromises = [];
     for (const product of productIds) {
       for (const storeName of stores) {
         const price = generatePrice(product.priceRange[0], product.priceRange[1]);
-        priceValues.push(`(${product.id}, ${storeIds[storeName]}, ${price})`);
+        pricePromises.push(
+          db.sql`INSERT INTO prices (product_id, store_id, price) VALUES (${product.id}, ${storeIds[storeName]}, ${price})`
+        );
         results.currentPrices++;
       }
     }
 
-    // Batch insert all prices at once
-    if (priceValues.length > 0) {
-      await db.sql`INSERT INTO prices (product_id, store_id, price) VALUES ${db.sql.raw(priceValues.join(','))}`;
-    }
+    // Execute all inserts in parallel (much faster than sequential)
+    await Promise.all(pricePromises);
 
     results.historicalPrices = 0;
 
