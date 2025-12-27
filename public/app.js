@@ -8,17 +8,42 @@ const STORE_ORDER = ['S-Market', 'Prisma', 'K-Citymarket', 'K-Supermarket', 'Lid
 
 // Theme management
 function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeButton(savedTheme);
+    const savedTheme = localStorage.getItem('theme');
+
+    // If no saved theme, use system preference
+    if (!savedTheme) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+    } else {
+        applyTheme(savedTheme);
+    }
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
+    const root = document.documentElement;
+    const currentIsDark = root.style.getPropertyValue('--text-color') === '#fff';
+    const newTheme = currentIsDark ? 'light' : 'dark';
+
     localStorage.setItem('theme', newTheme);
-    updateThemeButton(newTheme);
+    applyTheme(newTheme);
+}
+
+function applyTheme(theme) {
+    const root = document.documentElement;
+
+    if (theme === 'dark') {
+        root.style.setProperty('--text-color', '#fff');
+        root.style.setProperty('--text-color-alt', '#aaa');
+        root.style.setProperty('--background-color', '#000');
+        root.style.setProperty('--background-color-alt', '#111');
+    } else {
+        root.style.setProperty('--text-color', '#000');
+        root.style.setProperty('--text-color-alt', '#666');
+        root.style.setProperty('--background-color', '#fff');
+        root.style.setProperty('--background-color-alt', '#eee');
+    }
+
+    updateThemeButton(theme);
 }
 
 function updateThemeButton(theme) {

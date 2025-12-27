@@ -4,36 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>soexpensive.fi - Finnish supermarket price comparison</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="monospace.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Metadata Table -->
-    <div class="metadata-table">
-        <div class="meta-left">
-            <h1 class="meta-title">It's so expensive</h1>
-            <p class="meta-description">Finnish supermarket price comparison and tracker</p>
-        </div>
-        <div class="meta-right">
-            <table>
-                <tr>
-                    <td>Total Products</td>
-                    <td id="metaProducts">--</td>
-                </tr>
-                <tr>
-                    <td>Status</td>
-                    <td id="metaStatus">Active</td>
-                </tr>
-                <tr>
-                    <td>Cheapest Overall</td>
-                    <td id="metaCheapest">--</td>
-                </tr>
-                <tr>
-                    <td>Last Updated</td>
-                    <td id="metaLastUpdate">--</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    <table class="header">
+        <tr>
+            <td class="width-auto">
+                <h1>It's so expensive</h1>
+                <p>Finnish supermarket price comparison and tracker</p>
+            </td>
+            <td class="width-min">
+                <table>
+                    <tr>
+                        <td>Total Products</td>
+                        <td id="metaProducts">--</td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td id="metaStatus">Active</td>
+                    </tr>
+                    <tr>
+                        <td>Cheapest Overall</td>
+                        <td id="metaCheapest">--</td>
+                    </tr>
+                    <tr>
+                        <td>Last Updated</td>
+                        <td id="metaLastUpdate">--</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
     <!-- Theme Toggle -->
     <div class="theme-toggle-container">
