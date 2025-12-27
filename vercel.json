@@ -3,6 +3,18 @@
     {
       "source": "/",
       "destination": "/api"
+    },
+    {
+      "source": "/scraper",
+      "destination": "/scraper.html"
+    },
+    {
+      "source": "/status",
+      "destination": "/api/status"
+    },
+    {
+      "source": "/admin",
+      "destination": "/scraper.html"
     }
   ],
   "headers": [
