@@ -43,6 +43,8 @@ body {
     cursor: pointer;
     font-size: 0.85rem;
     color: var(--text-color-alt);
+    text-align: right;
+    white-space: nowrap;
 }
 
 .header-left {
