@@ -77,24 +77,11 @@ async function fetchProducts() {
     allProducts = await response.json();
 
     document.getElementById('loading').classList.add('hidden');
-
-    // Populate category filter
-    const categories = [...new Set(allProducts.map(p => p.category))].sort();
-    const categoryFilter = document.getElementById('categoryFilter');
-
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categoryFilter.appendChild(option);
-    });
 }
 
 // Setup event listeners
 function setupEventListeners() {
     document.getElementById('searchInput').addEventListener('input', debounce(renderProducts, 300));
-    document.getElementById('categoryFilter').addEventListener('change', renderProducts);
-    document.getElementById('sortBy').addEventListener('change', renderProducts);
 
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
@@ -118,30 +105,14 @@ function debounce(func, wait) {
 // Filter and sort products
 function getFilteredProducts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const category = document.getElementById('categoryFilter').value;
-    const sortBy = document.getElementById('sortBy').value;
 
     let filtered = allProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchTerm);
-        const matchesCategory = !category || product.category === category;
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
     });
 
-    // Sort products
-    filtered.sort((a, b) => {
-        switch (sortBy) {
-            case 'name':
-                return a.name.localeCompare(b.name);
-            case 'category':
-                return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
-            case 'price-low':
-                return getMinPrice(a) - getMinPrice(b);
-            case 'price-high':
-                return getMaxPrice(b) - getMaxPrice(a);
-            default:
-                return 0;
-        }
-    });
+    // Sort by name by default
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
 
     return filtered;
 }
