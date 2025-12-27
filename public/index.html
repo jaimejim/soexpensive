@@ -1,37 +1,28 @@
 <!DOCTYPE html>
-<html lang="fi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>soexpensive.fi - Finnish supermarket price comparison</title>
+    <title>It's so expensive - Finnish supermarket price comparison</title>
     <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="monospace.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Metadata Table -->
     <table class="header">
         <tr>
             <td class="width-auto">
                 <h1>It's so expensive</h1>
-                <p>Finnish supermarket price comparison and tracker</p>
+                <p>Finnish supermarket price comparison</p>
             </td>
             <td class="width-min">
                 <table>
                     <tr>
-                        <td>Total Products</td>
+                        <td>Products</td>
                         <td id="metaProducts">--</td>
                     </tr>
                     <tr>
-                        <td>Status</td>
-                        <td id="metaStatus">Active</td>
-                    </tr>
-                    <tr>
-                        <td>Cheapest Overall</td>
-                        <td id="metaCheapest">--</td>
-                    </tr>
-                    <tr>
-                        <td>Last Updated</td>
+                        <td>Updated</td>
                         <td id="metaLastUpdate">--</td>
                     </tr>
                 </table>
@@ -39,123 +30,75 @@
         </tr>
     </table>
 
-    <!-- Theme Toggle -->
-    <div class="theme-toggle-container">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-            <span id="themeIcon">☐</span> Dark mode
-        </button>
+    <label class="debug-toggle-label">
+        <input type="checkbox" id="themeToggle"> Dark mode
+    </label>
+
+    <h2>Store Comparison</h2>
+
+    <figure>
+        <pre id="asciiChart">Loading chart...</pre>
+        <figcaption>Cheapest product count by store</figcaption>
+    </figure>
+
+    <table id="storeTable">
+        <thead>
+            <tr>
+                <th>Store</th>
+                <th>Cheapest Count</th>
+                <th>Avg Price</th>
+                <th>Rank</th>
+            </tr>
+        </thead>
+        <tbody id="storeComparisonBody">
+        </tbody>
+    </table>
+
+    <h2>Products</h2>
+
+    <div class="grid">
+        <label>
+            Search
+            <input type="text" id="searchInput" placeholder="product name...">
+        </label>
+        <label>
+            Category
+            <select id="categoryFilter">
+                <option value="">all</option>
+            </select>
+        </label>
+        <label>
+            Sort
+            <select id="sortBy">
+                <option value="name">name</option>
+                <option value="category">category</option>
+                <option value="price-low">price (low→high)</option>
+                <option value="price-high">price (high→low)</option>
+            </select>
+        </label>
     </div>
 
-    <main>
-        <!-- Summary Stats -->
-        <section class="summary" id="summary">
-            <div class="summary-card">
-                <h3>Total Products</h3>
-                <div class="summary-value" id="totalProducts">--</div>
-            </div>
-            <div class="summary-card">
-                <h3>Stores Tracked</h3>
-                <div class="summary-value" id="totalStores">--</div>
-            </div>
-            <div class="summary-card">
-                <h3>Cheapest Overall</h3>
-                <div class="summary-value" id="cheapestStore">--</div>
-            </div>
-        </section>
+    <div id="loading" class="loading">Loading data...</div>
 
-        <!-- Filters -->
-        <section class="filters">
-            <div class="filter-container">
-                <div class="filter-group">
-                    <label for="searchInput">Search</label>
-                    <input type="text" id="searchInput" placeholder="product name...">
-                </div>
-                <div class="filter-group">
-                    <label for="categoryFilter">Category</label>
-                    <select id="categoryFilter">
-                        <option value="">all</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="sortBy">Sort</label>
-                    <select id="sortBy">
-                        <option value="name">name</option>
-                        <option value="category">category</option>
-                        <option value="price-low">price (low→high)</option>
-                        <option value="price-high">price (high→low)</option>
-                    </select>
-                </div>
-            </div>
-        </section>
+    <table id="productsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>S-Market</th>
+                <th>Prisma</th>
+                <th>K-City</th>
+                <th>K-Super</th>
+                <th>Lidl</th>
+                <th>Alepa</th>
+                <th>Best</th>
+            </tr>
+        </thead>
+        <tbody id="productsTableBody">
+        </tbody>
+    </table>
 
-        <!-- Loading -->
-        <div id="loading" class="loading">Loading data...</div>
-
-        <!-- Store Comparison -->
-        <section class="store-comparison" id="storeComparison">
-            <h2>Stores</h2>
-
-            <!-- ASCII Chart -->
-            <div class="ascii-chart">
-                <h3>Cheapest Product Count by Store</h3>
-                <pre id="asciiChart">Loading chart...</pre>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>STORE</th>
-                        <th>CHEAPEST COUNT</th>
-                        <th>AVG PRICE</th>
-                        <th>RANK</th>
-                    </tr>
-                </thead>
-                <tbody id="storeComparisonBody">
-                    <!-- Store comparison data inserted by JavaScript -->
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Products Table -->
-        <section class="products-section">
-            <h2>Products</h2>
-            <div class="products-table-container">
-                <table id="productsTable">
-                    <thead>
-                        <tr>
-                            <th>PRODUCT</th>
-                            <th>CATEGORY</th>
-                            <th>UNIT</th>
-                            <th>S-MARKET</th>
-                            <th>PRISMA</th>
-                            <th>K-CITY</th>
-                            <th>K-SUPER</th>
-                            <th>LIDL</th>
-                            <th>ALEPA</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTableBody">
-                        <!-- Products inserted by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <!-- Price History Modal -->
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalProductName">Price History</h2>
-                <button class="modal-close" id="modalClose">ESC</button>
-            </div>
-            <div class="chart-container">
-                <canvas id="priceChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

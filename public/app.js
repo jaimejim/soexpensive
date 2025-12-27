@@ -1,23 +1,22 @@
 // Global state
 let allProducts = [];
 let allStores = [];
-let currentChart = null;
+let currentTheme = 'light';
 
 // Store names in order
 const STORE_ORDER = ['S-Market', 'Prisma', 'K-Citymarket', 'K-Supermarket', 'Lidl', 'Alepa'];
 
 // Theme management
-let currentTheme = 'light';
-
 function initTheme() {
     const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
 
-    // If no saved theme, use system preference
-    if (!savedTheme) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        applyTheme(prefersDark ? 'dark' : 'light');
-    } else {
-        applyTheme(savedTheme);
+    applyTheme(theme);
+
+    const checkbox = document.getElementById('themeToggle');
+    if (checkbox) {
+        checkbox.checked = theme === 'dark';
     }
 }
 
@@ -42,40 +41,25 @@ function applyTheme(theme) {
         root.style.setProperty('--background-color', '#fff');
         root.style.setProperty('--background-color-alt', '#eee');
     }
-
-    updateThemeButton(theme);
-}
-
-function updateThemeButton(theme) {
-    const themeIcon = document.getElementById('themeIcon');
-    if (themeIcon) {
-        themeIcon.textContent = theme === 'dark' ? '☑' : '☐';
-    }
 }
 
 // Initialize app
 async function init() {
     try {
-        // Initialize theme
         initTheme();
 
-        // Fetch stores and products
         await Promise.all([
             fetchStores(),
             fetchProducts()
         ]);
 
-        // Setup event listeners
         setupEventListeners();
-
-        // Initial render
         renderProducts();
-        updateSummary();
         updateStoreComparison();
         updateMetadata();
     } catch (error) {
         console.error('Initialization error:', error);
-        document.getElementById('loading').textContent = 'Error loading data. Please refresh the page.';
+        document.getElementById('loading').textContent = 'Error loading data.';
     }
 }
 
@@ -112,17 +96,10 @@ function setupEventListeners() {
     document.getElementById('categoryFilter').addEventListener('change', renderProducts);
     document.getElementById('sortBy').addEventListener('change', renderProducts);
 
-    // Theme toggle
-    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-
-    // Modal close
-    document.getElementById('modalClose').addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('historyModal');
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('change', toggleTheme);
+    }
 }
 
 // Debounce function
@@ -161,8 +138,6 @@ function getFilteredProducts() {
                 return getMinPrice(a) - getMinPrice(b);
             case 'price-high':
                 return getMaxPrice(b) - getMaxPrice(a);
-            case 'variance':
-                return getPriceVariance(b) - getPriceVariance(a);
             default:
                 return 0;
         }
@@ -181,15 +156,6 @@ function getMinPrice(product) {
 function getMaxPrice(product) {
     const prices = Object.values(product.prices).map(p => p.price).filter(p => p !== null);
     return prices.length > 0 ? Math.max(...prices) : 0;
-}
-
-// Get price variance
-function getPriceVariance(product) {
-    const prices = Object.values(product.prices).map(p => p.price).filter(p => p !== null);
-    if (prices.length === 0) return 0;
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    return max - min;
 }
 
 // Get cheapest store for a product
@@ -213,7 +179,7 @@ function renderProducts() {
     const products = getFilteredProducts();
 
     if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="text-center">No products found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10">No products found</td></tr>';
         return;
     }
 
@@ -224,13 +190,13 @@ function renderProducts() {
         const priceColumns = STORE_ORDER.map(store => {
             const priceData = product.prices[store];
             if (!priceData || priceData.price === null) {
-                return `<td><span class="price unavailable">-</span></td>`;
+                return `<td>--</td>`;
             }
 
             const isCheapest = store === cheapestStore;
             const priceClass = isCheapest ? 'cheapest' : '';
 
-            return `<td><span class="price ${priceClass}">€${priceData.price.toFixed(2)}</span></td>`;
+            return `<td class="price ${priceClass}">€${priceData.price.toFixed(2)}</td>`;
         }).join('');
 
         return `
@@ -239,54 +205,17 @@ function renderProducts() {
                 <td>${product.category}</td>
                 <td>${product.unit}</td>
                 ${priceColumns}
-                <td class="best-price">€${minPrice.toFixed(2)}</td>
-                <td>
-                    <button class="history-btn" onclick="showPriceHistory(${product.id}, '${product.name.replace(/'/g, "\\'")}')">
-                        📊 History
-                    </button>
-                </td>
+                <td class="price"><strong>€${minPrice.toFixed(2)}</strong></td>
             </tr>
         `;
     }).join('');
 }
 
-// Update summary cards
-function updateSummary() {
-    document.getElementById('totalProducts').textContent = allProducts.length;
-    document.getElementById('totalStores').textContent = allStores.length;
-
-    // Calculate which store is cheapest overall
-    const storeTotals = {};
-    STORE_ORDER.forEach(store => {
-        storeTotals[store] = 0;
-    });
-
-    allProducts.forEach(product => {
-        const cheapestStore = getCheapestStore(product);
-        if (cheapestStore) {
-            storeTotals[cheapestStore]++;
-        }
-    });
-
-    const cheapestOverall = Object.entries(storeTotals)
-        .sort((a, b) => b[1] - a[1])[0];
-
-    document.getElementById('cheapestStore').innerHTML = `
-        <span class="store-badge">${cheapestOverall[0]}</span>
-        <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #666;">
-            Cheapest for ${cheapestOverall[1]} products
-        </div>
-    `;
-}
-
 // Generate ASCII bar chart
 function generateASCIIChart(storeStats) {
     const maxCount = Math.max(...storeStats.map(s => s.cheapestCount));
-    const maxHeight = 12;
+    const maxHeight = 10;
     const barWidth = 10;
-
-    // Find max name length for spacing
-    const maxNameLength = Math.max(...storeStats.map(s => s.name.length));
 
     let chart = '';
 
@@ -389,14 +318,14 @@ function updateStoreComparison() {
     // Render table
     tbody.innerHTML = storeStats.map((store, index) => {
         const rank = index + 1;
-        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+        const rankClass = rank === 1 ? 'rank-1' : '';
 
         return `
             <tr>
                 <td><strong>${store.name}</strong></td>
                 <td>${store.cheapestCount}</td>
                 <td>€${store.avgPrice.toFixed(2)}</td>
-                <td class="${rankClass}">#${rank}</td>
+                <td class="${rankClass}">${rank}</td>
             </tr>
         `;
     }).join('');
@@ -406,141 +335,6 @@ function updateStoreComparison() {
 function updateMetadata() {
     document.getElementById('metaProducts').textContent = allProducts.length;
     document.getElementById('metaLastUpdate').textContent = new Date().toLocaleDateString('fi-FI');
-
-    // Calculate cheapest overall store
-    const storeTotals = {};
-    STORE_ORDER.forEach(store => {
-        storeTotals[store] = 0;
-    });
-
-    allProducts.forEach(product => {
-        const cheapestStore = getCheapestStore(product);
-        if (cheapestStore) {
-            storeTotals[cheapestStore]++;
-        }
-    });
-
-    const cheapestOverall = Object.entries(storeTotals)
-        .sort((a, b) => b[1] - a[1])[0];
-
-    document.getElementById('metaCheapest').textContent = cheapestOverall ? cheapestOverall[0] : '--';
-}
-
-// Show price history modal
-async function showPriceHistory(productId, productName) {
-    const modal = document.getElementById('historyModal');
-    const modalTitle = document.getElementById('modalProductName');
-
-    modalTitle.textContent = `Price History: ${productName}`;
-    modal.classList.add('active');
-
-    try {
-        const response = await fetch(`/api/products/${productId}/history`);
-        const history = await response.json();
-
-        renderPriceChart(history);
-    } catch (error) {
-        console.error('Error fetching price history:', error);
-        alert('Error loading price history');
-    }
-}
-
-// Close modal
-function closeModal() {
-    const modal = document.getElementById('historyModal');
-    modal.classList.remove('active');
-
-    if (currentChart) {
-        currentChart.destroy();
-        currentChart = null;
-    }
-}
-
-// Render price chart
-function renderPriceChart(history) {
-    if (currentChart) {
-        currentChart.destroy();
-    }
-
-    // Group data by store
-    const storeData = {};
-    history.forEach(entry => {
-        if (!storeData[entry.store_name]) {
-            storeData[entry.store_name] = [];
-        }
-        storeData[entry.store_name].push({
-            x: new Date(entry.recorded_at),
-            y: entry.price
-        });
-    });
-
-    // Colors for different stores
-    const colors = {
-        'S-Market': '#ff6384',
-        'Prisma': '#36a2eb',
-        'K-Citymarket': '#ffce56',
-        'K-Supermarket': '#4bc0c0',
-        'Lidl': '#9966ff',
-        'Alepa': '#ff9f40'
-    };
-
-    const datasets = Object.entries(storeData).map(([store, data]) => ({
-        label: store,
-        data: data,
-        borderColor: colors[store] || '#999',
-        backgroundColor: colors[store] + '33' || '#99933',
-        tension: 0.1
-    }));
-
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    currentChart = new Chart(ctx, {
-        type: 'line',
-        data: { datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'month',
-                        displayFormats: {
-                            month: 'MMM yyyy'
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'Price (€)'
-                    },
-                    ticks: {
-                        callback: function(value) {
-                            return '€' + value.toFixed(2);
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': €' + context.parsed.y.toFixed(2);
-                        }
-                    }
-                }
-            }
-        }
-    });
 }
 
 // Initialize when DOM is loaded

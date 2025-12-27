@@ -1,143 +1,14 @@
 /* ╔══════════════════════════════════════════════════════════════╗
-   ║  SoExpensive - Custom Styles for Monospace Web             ║
+   ║  It's so expensive - Minimal custom styles                 ║
    ║  Built on @owickstrom/the-monospace-web                     ║
    ╚══════════════════════════════════════════════════════════════╝ */
 
-/* Override body max-width for more screen space */
+/* Wider layout for data tables */
 body {
     max-width: calc(min(140ch, round(down, 100%, 1ch)));
 }
 
-/* ═══ Theme Toggle ═══ */
-.theme-toggle-container {
-    text-align: right;
-    margin-bottom: calc(var(--line-height) * 2);
-}
-
-.theme-toggle {
-    background: transparent;
-    border: none;
-    font-family: inherit;
-    font-size: 1em;
-    color: var(--text-color);
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.2s;
-    text-transform: none;
-    height: auto;
-}
-
-.theme-toggle:hover {
-    color: var(--text-color-alt);
-    background: transparent;
-}
-
-.theme-toggle:active {
-    transform: none;
-}
-
-.theme-toggle #themeIcon {
-    font-size: 1.2em;
-}
-
-/* ═══ Summary Cards ═══ */
-.summary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1ch;
-    margin: calc(var(--line-height) * 2) 0;
-}
-
-.summary-card {
-    border: var(--border-thickness) solid var(--text-color);
-    padding: var(--line-height) 1ch;
-}
-
-.summary-card h3 {
-    margin: 0 0 var(--line-height) 0;
-    font-size: 1rem;
-    font-weight: var(--font-weight-medium);
-}
-
-.summary-value {
-    font-size: 2em;
-    font-weight: var(--font-weight-bold);
-    line-height: 1;
-}
-
-/* ═══ Filters ═══ */
-.filters {
-    border: var(--border-thickness) solid var(--text-color);
-    padding: var(--line-height) 1ch;
-    margin: calc(var(--line-height) * 2) 0;
-}
-
-.filter-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1ch;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--line-height) / 2);
-}
-
-.filter-group label {
-    font-weight: var(--font-weight-medium);
-}
-
-/* ═══ ASCII Chart ═══ */
-.ascii-chart {
-    margin: calc(var(--line-height) * 2) 0;
-    padding: var(--line-height) 1ch;
-    background: var(--background-color-alt);
-    border: var(--border-thickness) solid var(--text-color);
-}
-
-.ascii-chart h3 {
-    margin: 0 0 var(--line-height) 0;
-    font-size: 1rem;
-    font-weight: var(--font-weight-medium);
-}
-
-.ascii-chart pre {
-    font-family: inherit;
-    font-size: 0.9em;
-    line-height: 1.4;
-    overflow-x: auto;
-    margin: 0;
-}
-
-/* ═══ Store Rankings ═══ */
-.rank-1 {
-    font-weight: var(--font-weight-bold);
-}
-
-.rank-1::before {
-    content: '★ ';
-}
-
-/* ═══ Price Styling ═══ */
-.price {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.price.cheapest {
-    font-weight: var(--font-weight-bold);
-}
-
-.price.cheapest::before {
-    content: '→ ';
-}
-
-.price.cheapest::after {
-    content: ' ✓';
-}
-
-/* ═══ Loading ═══ */
+/* Loading state */
 .loading {
     text-align: center;
     padding: calc(var(--line-height) * 2);
@@ -148,58 +19,32 @@ body {
     display: none !important;
 }
 
-/* ═══ Modal ═══ */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 1000;
-    padding: calc(var(--line-height) * 2);
+/* Price formatting */
+.price {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
-.modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.price.cheapest {
+    font-weight: var(--font-weight-bold);
 }
 
-.modal-content {
-    background: var(--background-color);
-    border: calc(var(--border-thickness) * 2) solid var(--text-color);
-    padding: calc(var(--line-height) * 2);
-    max-width: 90ch;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
+.price.cheapest::before {
+    content: '★ ';
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: var(--line-height);
-    padding-bottom: var(--line-height);
-    border-bottom: var(--border-thickness) solid var(--text-color);
+/* Store ranking */
+.rank-1 {
+    font-weight: var(--font-weight-bold);
 }
 
-.modal-header h2 {
-    margin: 0;
+.rank-1::before {
+    content: '#';
 }
 
-.chart-container {
-    margin: var(--line-height) 0;
-    min-height: 40ch;
-    padding: var(--line-height);
-}
-
-/* ═══ Responsive ═══ */
+/* Responsive tables */
 @media (max-width: 768px) {
-    .summary {
-        grid-template-columns: 1fr;
-    }
-
-    .filter-container {
-        grid-template-columns: 1fr;
+    table {
+        font-size: 0.9em;
     }
 }
