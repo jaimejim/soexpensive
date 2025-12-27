@@ -7,38 +7,37 @@ module.exports = async (req, res) => {
 
   try {
     const results = {
-      before: {},
-      after: {},
-      deleted: {}
+      before: { products: 0, prices: 0, stores: 0 },
+      after: { products: 0, prices: 0, stores: 0 },
+      deleted: { products: 0, prices: 0, stores: 0 }
     };
 
-    // Check current state
-    const productsBefore = await sql`SELECT COUNT(*) as count FROM products`;
-    const pricesBefore = await sql`SELECT COUNT(*) as count FROM prices`;
-    const storesBefore = await sql`SELECT COUNT(*) as count FROM stores`;
+    // Check current state (tables might not exist)
+    try {
+      const productsBefore = await sql`SELECT COUNT(*) as count FROM products`;
+      const pricesBefore = await sql`SELECT COUNT(*) as count FROM prices`;
+      const storesBefore = await sql`SELECT COUNT(*) as count FROM stores`;
 
-    results.before = {
-      products: parseInt(productsBefore.rows[0].count),
-      prices: parseInt(pricesBefore.rows[0].count),
-      stores: parseInt(storesBefore.rows[0].count)
-    };
+      results.before = {
+        products: parseInt(productsBefore.rows[0].count),
+        prices: parseInt(pricesBefore.rows[0].count),
+        stores: parseInt(storesBefore.rows[0].count)
+      };
+    } catch (error) {
+      // Tables don't exist yet - that's fine
+      console.log('Tables do not exist, skipping count');
+    }
 
     // Drop tables completely to reset schema
     await sql`DROP TABLE IF EXISTS prices CASCADE`;
     await sql`DROP TABLE IF EXISTS products CASCADE`;
     await sql`DROP TABLE IF EXISTS stores CASCADE`;
 
-    // Verify cleanup
-    results.after = {
-      products: 0,
-      prices: 0,
-      stores: 0
-    };
-
+    // Calculate what was deleted
     results.deleted = {
-      products: results.before.products,
-      prices: results.before.prices,
-      stores: results.before.stores
+      products: results.before.products - 0,
+      prices: results.before.prices - 0,
+      stores: results.before.stores - 0
     };
 
     res.status(200).json({
