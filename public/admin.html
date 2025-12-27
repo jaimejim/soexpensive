@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - It's so expensive</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="monospace.css">
+    <style>
+        body {
+            max-width: 100ch;
+            padding: 2rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #output {
+            margin-top: 2rem;
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .section {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid var(--text-color-alt);
+        }
+    </style>
+</head>
+<body>
+    <h1>Database Admin</h1>
+
+    <div class="section">
+        <h2>1. Diagnostic</h2>
+        <p>Check current database state</p>
+        <button onclick="checkDuplicates()">Check for Duplicates</button>
+    </div>
+
+    <div class="section">
+        <h2>2. Cleanup & Reseed</h2>
+        <p><strong>Warning:</strong> This will delete all data and reseed from scratch</p>
+        <button onclick="cleanup()">Step 1: Clean Database</button>
+        <button onclick="seed()" disabled id="seedBtn">Step 2: Seed Database</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function log(message) {
+            output.textContent += message + '\n';
+        }
+
+        async function checkDuplicates() {
+            output.textContent = 'Checking for duplicates...\n';
+
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+
+                // Count occurrences of each product name
+                const counts = {};
+                products.forEach(p => {
+                    const key = `${p.name} (${p.category})`;
+                    counts[key] = (counts[key] || 0) + 1;
+                });
+
+                // Find duplicates
+                const duplicates = Object.entries(counts).filter(([_, count]) => count > 1);
+
+                if (duplicates.length === 0) {
+                    log('✓ No duplicates found!');
+                    log(`Total products: ${products.length}`);
+                } else {
+                    log(`✗ Found ${duplicates.length} duplicate products:\n`);
+                    duplicates.forEach(([name, count]) => {
+                        log(`  ${name}: appears ${count} times`);
+                    });
+                    log(`\nTotal products (including duplicates): ${products.length}`);
+                    log(`\nRecommendation: Clean and reseed database`);
+                }
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function cleanup() {
+            if (!confirm('This will DELETE ALL DATA. Are you sure?')) {
+                return;
+            }
+
+            output.textContent = 'Cleaning database...\n';
+
+            try {
+                const response = await fetch('/api/cleanup', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                log('=== CLEANUP COMPLETE ===\n');
+                log(`Before: ${data.results.before.products} products, ${data.results.before.prices} prices`);
+                log(`Deleted: ${data.results.deleted.products} products, ${data.results.deleted.prices} prices`);
+                log(`After: ${data.results.after.products} products, ${data.results.after.prices} prices`);
+                log('\n✓ Database is now empty');
+                log('\nNext: Click "Step 2: Seed Database"');
+
+                // Enable seed button
+                document.getElementById('seedBtn').disabled = false;
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function seed() {
+            output.textContent = 'Seeding database...\n';
+
+            try {
+                const response = await fetch('/api/seed', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                log('=== SEED COMPLETE ===\n');
+                log(`Stores: ${data.results.stores}`);
+                log(`Products: ${data.results.products}`);
+                log(`Prices: ${data.results.currentPrices}`);
+                log('\n✓ Database seeded successfully!');
+                log('\nNext: Check the main site to verify');
+
+                // Disable seed button
+                document.getElementById('seedBtn').disabled = true;
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
