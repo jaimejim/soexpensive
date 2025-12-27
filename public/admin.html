@@ -124,10 +124,21 @@
         async function seed() {
             output.textContent = 'Seeding database...\n';
 
+            // Show timeout warning after 8 seconds
+            const timeoutWarning = setTimeout(() => {
+                log('Still working... (Vercel has 10s timeout limit)');
+            }, 8000);
+
             try {
                 const response = await fetch('/api/seed', {
                     method: 'POST'
                 });
+
+                clearTimeout(timeoutWarning);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
 
                 const data = await response.json();
 

@@ -201,17 +201,21 @@ module.exports = async (req, res) => {
       results.products++;
     }
 
-    // Add current prices
+    // Add current prices using batch insert for speed
+    const priceValues = [];
     for (const product of productIds) {
       for (const storeName of stores) {
         const price = generatePrice(product.priceRange[0], product.priceRange[1]);
-        await db.addPrice(product.id, storeIds[storeName], price);
+        priceValues.push(`(${product.id}, ${storeIds[storeName]}, ${price})`);
         results.currentPrices++;
       }
     }
 
-    // Skip historical prices to prevent timeout
-    // Only current prices are seeded for now
+    // Batch insert all prices at once
+    if (priceValues.length > 0) {
+      await db.sql`INSERT INTO prices (product_id, store_id, price) VALUES ${db.sql.raw(priceValues.join(','))}`;
+    }
+
     results.historicalPrices = 0;
 
     res.json({
