@@ -131,10 +131,25 @@
 
                 const data = await response.json();
 
+                // Check if there was an error
+                if (!data.success || data.error) {
+                    log('=== SEED FAILED ===\n');
+                    log(`Error: ${data.error || 'Unknown error'}`);
+                    log('\nDebug info:');
+                    log(JSON.stringify(data, null, 2));
+                    return;
+                }
+
                 log('=== SEED COMPLETE ===\n');
-                log(`Stores: ${data.results.stores}`);
-                log(`Products: ${data.results.products}`);
-                log(`Prices: ${data.results.currentPrices}`);
+                if (data.results) {
+                    log(`Stores: ${data.results.stores || 0}`);
+                    log(`Products: ${data.results.products || 0}`);
+                    log(`Prices: ${data.results.currentPrices || 0}`);
+                } else {
+                    log('Warning: No results data returned');
+                    log('\nFull response:');
+                    log(JSON.stringify(data, null, 2));
+                }
                 log('\n✓ Database seeded successfully!');
                 log('\nNext: Check the main site to verify');
 
