@@ -1,50 +1,267 @@
 /* ╔══════════════════════════════════════════════════════════════╗
-   ║  It's so expensive - Minimal custom styles                 ║
-   ║  Built on @owickstrom/the-monospace-web                     ║
+   ║  It's so expensive - Enhanced design with clear hierarchy   ║
    ╚══════════════════════════════════════════════════════════════╝ */
 
-/* Wider layout for data tables */
+/* ═══ Spacing System (8px base unit) ═══ */
+:root {
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --accent-green: #4ecdc4;
+    --accent-red: #ff6b6b;
+}
+
+/* Dark mode improved contrast */
+[style*="--text-color: #fff"] {
+    --text-color: #ededed !important;
+    --text-color-alt: #8a8a8a !important;
+    --background-color: #0a0a0a !important;
+}
+
+/* Wider layout */
 body {
     max-width: calc(min(140ch, round(down, 100%, 1ch)));
 }
 
-/* Loading state */
-.loading {
-    text-align: center;
-    padding: calc(var(--line-height) * 2);
+/* ═══ 1. Header with clear hierarchy ═══ */
+.site-header {
+    margin-bottom: var(--space-4);
+}
+
+.site-title {
+    font-size: 3rem;
+    line-height: 1.2;
+    margin: 0 0 var(--space-2) 0;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+}
+
+.site-subtitle {
+    font-size: 1.1rem;
     color: var(--text-color-alt);
+    margin: 0 0 var(--space-3) 0;
+    font-weight: var(--font-weight-normal);
+}
+
+.meta-strip {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--text-color);
+    border-bottom: 1px solid var(--text-color);
+    font-size: 0.9rem;
+    color: var(--text-color-alt);
+}
+
+.meta-strip strong {
+    color: var(--text-color);
+}
+
+.theme-toggle-inline {
+    margin-left: auto;
+    cursor: pointer;
+}
+
+/* ═══ 2. Summary Insight Strip ═══ */
+.summary-insight {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-3);
+    margin: var(--space-4) 0;
+    padding: var(--space-3);
+    background: var(--background-color-alt);
+}
+
+.insight-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.insight-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-color-alt);
+    letter-spacing: 0.05em;
+}
+
+.insight-value {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--accent-green);
+}
+
+/* ═══ 3. Section Headers ═══ */
+h2 {
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.05em;
+    margin: var(--space-4) 0 var(--space-3) 0;
+    color: var(--text-color);
+}
+
+hr {
+    margin: var(--space-4) 0;
+    border: none;
+    border-top: 1px solid var(--text-color);
+    opacity: 0.3;
+}
+
+/* ═══ 4. Filter Block (grouped, no boxes) ═══ */
+.filter-block {
+    margin: var(--space-3) 0;
+}
+
+.filter-label {
+    display: block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-color-alt);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--space-2);
+}
+
+.filter-grid input,
+.filter-grid select {
+    min-height: 44px; /* Better touch target */
+}
+
+/* ═══ 5. Loading States ═══ */
+.loading-state {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--text-color-alt);
+}
+
+.loading-text {
+    font-weight: var(--font-weight-medium);
+}
+
+.loading-dots {
+    display: inline-block;
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
 }
 
 .hidden {
     display: none !important;
 }
 
-/* Price formatting */
+/* ═══ 6. Tables - Improved readability ═══ */
+.table-container {
+    overflow-x: auto;
+    margin: var(--space-3) 0;
+}
+
+.products-table tbody tr:nth-child(even) {
+    background: var(--background-color-alt);
+}
+
+.products-table thead th {
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-bold);
+}
+
+/* Sticky first column on mobile */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: var(--background-color);
+    z-index: 1;
+}
+
+.products-table tbody tr:nth-child(even) .sticky-col {
+    background: var(--background-color-alt);
+}
+
+/* ═══ 7. Price Highlighting with Accent ═══ */
 .price {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    color: var(--text-color-alt);
 }
 
 .price.cheapest {
     font-weight: var(--font-weight-bold);
+    color: var(--accent-green);
 }
 
 .price.cheapest::before {
-    content: '★ ';
+    content: '→ ';
 }
 
-/* Store ranking */
+/* De-emphasize non-cheapest prices */
+.products-table td:not(.price.cheapest).price {
+    opacity: 0.6;
+}
+
+/* ═══ 8. Store Rankings ═══ */
 .rank-1 {
     font-weight: var(--font-weight-bold);
+    color: var(--accent-green);
 }
 
 .rank-1::before {
     content: '#';
 }
 
-/* Responsive tables */
+/* ═══ 9. Chart Section ═══ */
+.chart-section figure {
+    margin: var(--space-3) 0;
+}
+
+/* ═══ 10. Responsive ═══ */
 @media (max-width: 768px) {
-    table {
-        font-size: 0.9em;
+    .site-title {
+        font-size: 2rem;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-insight {
+        grid-template-columns: 1fr;
+    }
+
+    .meta-strip {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .theme-toggle-inline {
+        margin-left: 0;
+    }
+
+    /* Make table scroll horizontally */
+    .table-container {
+        margin-left: calc(-1 * var(--space-2));
+        margin-right: calc(-1 * var(--space-2));
+    }
+}
+
+@media (max-width: 480px) {
+    .site-title {
+        font-size: 1.75rem;
+    }
+
+    .products-table {
+        font-size: 0.85em;
     }
 }

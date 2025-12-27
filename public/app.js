@@ -331,10 +331,56 @@ function updateStoreComparison() {
     }).join('');
 }
 
-// Update metadata
+// Update metadata and summary insights
 function updateMetadata() {
     document.getElementById('metaProducts').textContent = allProducts.length;
     document.getElementById('metaLastUpdate').textContent = new Date().toLocaleDateString('fi-FI');
+
+    // Calculate summary insights
+    const storeTotals = {};
+    const storeAvgPrices = {};
+
+    STORE_ORDER.forEach(store => {
+        storeTotals[store] = 0;
+        storeAvgPrices[store] = { total: 0, count: 0 };
+    });
+
+    allProducts.forEach(product => {
+        const cheapestStore = getCheapestStore(product);
+        if (cheapestStore) {
+            storeTotals[cheapestStore]++;
+        }
+
+        // Calculate average prices per store
+        Object.entries(product.prices).forEach(([store, data]) => {
+            if (data && data.price !== null) {
+                storeAvgPrices[store].total += data.price;
+                storeAvgPrices[store].count++;
+            }
+        });
+    });
+
+    // Cheapest overall (by count)
+    const cheapestOverall = Object.entries(storeTotals)
+        .sort((a, b) => b[1] - a[1])[0];
+
+    document.getElementById('cheapestOverall').textContent = cheapestOverall[0];
+    document.getElementById('cheapestCount').textContent =
+        `${cheapestOverall[0]} (${cheapestOverall[1]} / ${allProducts.length})`;
+
+    // Calculate price gap
+    const avgPrices = Object.entries(storeAvgPrices)
+        .filter(([_, data]) => data.count > 0)
+        .map(([store, data]) => ({
+            store,
+            avg: data.total / data.count
+        }));
+
+    const minAvg = Math.min(...avgPrices.map(s => s.avg));
+    const maxAvg = Math.max(...avgPrices.map(s => s.avg));
+    const priceGap = ((maxAvg - minAvg) / minAvg * 100).toFixed(0);
+
+    document.getElementById('priceGap').textContent = `+${priceGap}%`;
 }
 
 // Initialize when DOM is loaded

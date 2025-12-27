@@ -9,95 +9,110 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <table class="header">
-        <tr>
-            <td class="width-auto">
-                <h1>It's so expensive</h1>
-                <p>Finnish supermarket price comparison</p>
-            </td>
-            <td class="width-min">
-                <table>
+    <!-- 1. Title + Value Prop -->
+    <header class="site-header">
+        <h1 class="site-title">It's so expensive</h1>
+        <p class="site-subtitle">Compare grocery prices across Finnish supermarkets. Updated daily.</p>
+
+        <div class="meta-strip">
+            <span><strong id="metaProducts">--</strong> products tracked</span>
+            <span>Last updated: <strong id="metaLastUpdate">--</strong></span>
+            <label class="theme-toggle-inline">
+                <input type="checkbox" id="themeToggle"> Dark mode
+            </label>
+        </div>
+    </header>
+
+    <!-- 2. Key Stats / Summary -->
+    <section class="summary-insight">
+        <div class="insight-item">
+            <span class="insight-label">Cheapest overall</span>
+            <strong class="insight-value" id="cheapestOverall">--</strong>
+        </div>
+        <div class="insight-item">
+            <span class="insight-label">Cheapest for most items</span>
+            <strong class="insight-value" id="cheapestCount">--</strong>
+        </div>
+        <div class="insight-item">
+            <span class="insight-label">Avg price gap (worst vs best)</span>
+            <strong class="insight-value" id="priceGap">--</strong>
+        </div>
+    </section>
+
+    <hr>
+
+    <!-- 3. Store Comparison Chart -->
+    <section class="chart-section">
+        <h2>Store Comparison</h2>
+
+        <figure>
+            <pre id="asciiChart">Loading price comparison...</pre>
+            <figcaption>Cheapest product count by store</figcaption>
+        </figure>
+
+        <table id="storeTable">
+            <thead>
+                <tr>
+                    <th>Store</th>
+                    <th>Cheapest Count</th>
+                    <th>Avg Price</th>
+                    <th>Rank</th>
+                </tr>
+            </thead>
+            <tbody id="storeComparisonBody">
+            </tbody>
+        </table>
+    </section>
+
+    <hr>
+
+    <!-- 4. Products Table -->
+    <section class="products-section">
+        <h2>Products</h2>
+
+        <!-- Filters grouped -->
+        <div class="filter-block">
+            <label class="filter-label">Filter products</label>
+            <div class="filter-grid">
+                <input type="text" id="searchInput" placeholder="Search products...">
+                <select id="categoryFilter">
+                    <option value="">All categories</option>
+                </select>
+                <select id="sortBy">
+                    <option value="name">Sort: Name</option>
+                    <option value="category">Sort: Category</option>
+                    <option value="price-low">Sort: Price (low→high)</option>
+                    <option value="price-high">Sort: Price (high→low)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="loading" class="loading-state">
+            <span class="loading-text">Loading price comparison</span>
+            <span class="loading-dots">...</span>
+        </div>
+
+        <div class="table-container">
+            <table id="productsTable" class="products-table">
+                <thead>
                     <tr>
-                        <td>Products</td>
-                        <td id="metaProducts">--</td>
+                        <th class="sticky-col">Product</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>S-Market</th>
+                        <th>Prisma</th>
+                        <th>K-City</th>
+                        <th>K-Super</th>
+                        <th>Lidl</th>
+                        <th>Alepa</th>
+                        <th>Best</th>
                     </tr>
-                    <tr>
-                        <td>Updated</td>
-                        <td id="metaLastUpdate">--</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    <label class="debug-toggle-label">
-        <input type="checkbox" id="themeToggle"> Dark mode
-    </label>
-
-    <h2>Store Comparison</h2>
-
-    <figure>
-        <pre id="asciiChart">Loading chart...</pre>
-        <figcaption>Cheapest product count by store</figcaption>
-    </figure>
-
-    <table id="storeTable">
-        <thead>
-            <tr>
-                <th>Store</th>
-                <th>Cheapest Count</th>
-                <th>Avg Price</th>
-                <th>Rank</th>
-            </tr>
-        </thead>
-        <tbody id="storeComparisonBody">
-        </tbody>
-    </table>
-
-    <h2>Products</h2>
-
-    <div class="grid">
-        <label>
-            Search
-            <input type="text" id="searchInput" placeholder="product name...">
-        </label>
-        <label>
-            Category
-            <select id="categoryFilter">
-                <option value="">all</option>
-            </select>
-        </label>
-        <label>
-            Sort
-            <select id="sortBy">
-                <option value="name">name</option>
-                <option value="category">category</option>
-                <option value="price-low">price (low→high)</option>
-                <option value="price-high">price (high→low)</option>
-            </select>
-        </label>
-    </div>
-
-    <div id="loading" class="loading">Loading data...</div>
-
-    <table id="productsTable">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Unit</th>
-                <th>S-Market</th>
-                <th>Prisma</th>
-                <th>K-City</th>
-                <th>K-Super</th>
-                <th>Lidl</th>
-                <th>Alepa</th>
-                <th>Best</th>
-            </tr>
-        </thead>
-        <tbody id="productsTableBody">
-        </tbody>
-    </table>
+                </thead>
+                <tbody id="productsTableBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <script src="app.js"></script>
 </body>
