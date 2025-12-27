@@ -1,102 +1,162 @@
 <!DOCTYPE html>
-<html lang="fi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>soexpensive.fi - Finnish supermarket price comparison</title>
+    <title>It's so expensive - Finnish supermarket price comparison</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="monospace.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>soexpensive.fi</h1>
-        <p class="tagline">Finnish supermarket price comparison tool</p>
+    <!-- 1. Two-column header: Title/Meta on left, Stats on right -->
+    <header class="site-header-grid">
+        <!-- Dark mode toggle - top right within header -->
+        <label class="theme-toggle-header">
+            <input type="checkbox" id="themeToggle"> Dark mode
+        </label>
+
+        <div class="header-left">
+            <h1 class="site-title">It's so expensive</h1>
+            <p class="site-subtitle">Compare grocery prices across Finnish supermarkets. Updated daily, entirely vibecoded.</p>
+
+            <div class="meta-info">
+                <div><strong id="metaProducts">--</strong> products tracked</div>
+                <div>Last updated: <strong id="metaLastUpdate">--</strong></div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="insight-item">
+                <span class="insight-label">Cheapest overall</span>
+                <strong class="insight-value" id="cheapestOverall">--</strong>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Cheapest for most items</span>
+                <strong class="insight-value" id="cheapestCount">--</strong>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Avg price gap (worst vs best)</span>
+                <strong class="insight-value" id="priceGap">--</strong>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <!-- Summary Stats -->
-        <section class="summary" id="summary">
-            <div class="summary-card">
-                <h3>Total Products</h3>
-                <div class="summary-value" id="totalProducts">--</div>
-            </div>
-            <div class="summary-card">
-                <h3>Stores Tracked</h3>
-                <div class="summary-value" id="totalStores">--</div>
-            </div>
-            <div class="summary-card">
-                <h3>Cheapest Overall</h3>
-                <div class="summary-value" id="cheapestStore">--</div>
-            </div>
-        </section>
+    <!-- 3. Store Comparison Chart -->
+    <section class="chart-section">
+        <h2>Store Comparison</h2>
 
-        <!-- Filters -->
-        <section class="filters">
-            <div class="filter-container">
-                <div class="filter-group">
-                    <label for="searchInput">Search</label>
-                    <input type="text" id="searchInput" placeholder="product name...">
-                </div>
-                <div class="filter-group">
-                    <label for="categoryFilter">Category</label>
-                    <select id="categoryFilter">
-                        <option value="">all</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="sortBy">Sort</label>
-                    <select id="sortBy">
-                        <option value="name">name</option>
-                        <option value="category">category</option>
-                        <option value="price-low">price (low→high)</option>
-                        <option value="price-high">price (high→low)</option>
-                    </select>
-                </div>
-            </div>
-        </section>
+        <div class="chart-grid">
+            <figure class="chart-figure">
+                <pre id="asciiChart" class="hidden"></pre>
+                <div id="chartSkeleton" class="skeleton skeleton-chart"></div>
+                <figcaption>
+                    █ Cheapest | ░ Available
+                </figcaption>
+            </figure>
 
-        <!-- Loading -->
-        <div id="loading" class="loading">Loading data...</div>
-
-        <!-- Products Table -->
-        <section class="products-section">
-            <h2>Products</h2>
-            <div class="products-table-container">
-                <table id="productsTable">
+            <div class="chart-table">
+                <table id="storeTable">
                     <thead>
                         <tr>
-                            <th>PRODUCT</th>
-                            <th>CATEGORY</th>
-                            <th>UNIT</th>
-                            <th>S-MARKET</th>
-                            <th>PRISMA</th>
-                            <th>K-CITY</th>
-                            <th>K-SUPER</th>
-                            <th>LIDL</th>
-                            <th>ALEPA</th>
+                            <th>Store</th>
+                            <th>Cheapest Count</th>
+                            <th>Avg Price</th>
+                            <th>Rank</th>
                         </tr>
                     </thead>
-                    <tbody id="productsTableBody">
-                        <!-- Products inserted by JavaScript -->
+                    <tbody id="storeComparisonBody">
+                        <tr id="storeSkeleton">
+                            <td><div class="skeleton skeleton-text medium"></div></td>
+                            <td><div class="skeleton skeleton-text short"></div></td>
+                            <td><div class="skeleton skeleton-text short"></div></td>
+                            <td><div class="skeleton skeleton-text short"></div></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <!-- Price History Modal -->
-    <div id="historyModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalProductName">Price History</h2>
-                <button class="modal-close" id="modalClose">ESC</button>
-            </div>
-            <div class="chart-container">
-                <canvas id="priceChart"></canvas>
+    <!-- 4. Products Table -->
+    <section class="products-section">
+        <h2>Products</h2>
+
+        <!-- Filters grouped -->
+        <div class="filter-block">
+            <label class="filter-label">Filter products</label>
+            <div class="filter-grid">
+                <input type="text" id="searchInput" placeholder="Search products...">
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <div id="loading" class="loading-state hidden">
+            <span class="loading-text">Loading price comparison</span>
+            <span class="loading-dots">...</span>
+        </div>
+
+        <div class="table-container">
+            <table id="productsTable" class="products-table">
+                <thead>
+                    <tr>
+                        <th class="sticky-col">Product</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>S-Market</th>
+                        <th>Prisma</th>
+                        <th>K-City</th>
+                        <th>K-Super</th>
+                        <th>Lidl</th>
+                        <th>Alepa</th>
+                        <th>Best</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <tr class="skeleton-row">
+                        <td><div class="skeleton skeleton-text"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                    </tr>
+                    <tr class="skeleton-row">
+                        <td><div class="skeleton skeleton-text medium"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                    </tr>
+                    <tr class="skeleton-row">
+                        <td><div class="skeleton skeleton-text"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                        <td><div class="skeleton skeleton-text short"></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <script src="app.js"></script>
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
 </body>
 </html>

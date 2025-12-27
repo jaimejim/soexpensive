@@ -10,7 +10,8 @@ async function initDatabase() {
         name TEXT NOT NULL,
         category TEXT NOT NULL,
         unit TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(name, category, unit)
       )
     `;
 
@@ -129,6 +130,8 @@ async function addProduct(name, category, unit) {
   const result = await sql`
     INSERT INTO products (name, category, unit)
     VALUES (${name}, ${category}, ${unit})
+    ON CONFLICT (name, category, unit) DO UPDATE
+    SET name = EXCLUDED.name
     RETURNING id
   `;
 

@@ -1,0 +1,73 @@
+{
+  "prices": [
+    {"product": "Milk", "store": "Lidl", "price": 0.99},
+    {"product": "Milk", "store": "S-Market", "price": 1.15},
+    {"product": "Milk", "store": "Prisma", "price": 1.09},
+    {"product": "Milk", "store": "K-Citymarket", "price": 1.19},
+    {"product": "Milk", "store": "K-Supermarket", "price": 1.22},
+    {"product": "Milk", "store": "Alepa", "price": 1.25},
+
+    {"product": "Bread", "store": "Lidl", "price": 0.79},
+    {"product": "Bread", "store": "S-Market", "price": 1.29},
+    {"product": "Bread", "store": "Prisma", "price": 1.19},
+    {"product": "Bread", "store": "K-Citymarket", "price": 1.35},
+    {"product": "Bread", "store": "K-Supermarket", "price": 1.39},
+    {"product": "Bread", "store": "Alepa", "price": 1.45},
+
+    {"product": "Cheese", "store": "Lidl", "price": 2.99},
+    {"product": "Cheese", "store": "S-Market", "price": 3.49},
+    {"product": "Cheese", "store": "Prisma", "price": 3.29},
+    {"product": "Cheese", "store": "K-Citymarket", "price": 3.59},
+    {"product": "Cheese", "store": "K-Supermarket", "price": 3.69},
+    {"product": "Cheese", "store": "Alepa", "price": 3.79},
+
+    {"product": "Eggs", "store": "Lidl", "price": 2.49},
+    {"product": "Eggs", "store": "S-Market", "price": 2.89},
+    {"product": "Eggs", "store": "Prisma", "price": 2.79},
+    {"product": "Eggs", "store": "K-Citymarket", "price": 2.95},
+    {"product": "Eggs", "store": "K-Supermarket", "price": 2.99},
+    {"product": "Eggs", "store": "Alepa", "price": 3.09},
+
+    {"product": "Tomato", "store": "Lidl", "price": 1.99},
+    {"product": "Tomato", "store": "S-Market", "price": 2.49},
+    {"product": "Tomato", "store": "Prisma", "price": 2.29},
+    {"product": "Tomato", "store": "K-Citymarket", "price": 2.59},
+    {"product": "Tomato", "store": "K-Supermarket", "price": 2.69},
+    {"product": "Tomato", "store": "Alepa", "price": 2.79},
+
+    {"product": "Banana", "store": "Lidl", "price": 1.49},
+    {"product": "Banana", "store": "S-Market", "price": 1.79},
+    {"product": "Banana", "store": "Prisma", "price": 1.69},
+    {"product": "Banana", "store": "K-Citymarket", "price": 1.89},
+    {"product": "Banana", "store": "K-Supermarket", "price": 1.95},
+    {"product": "Banana", "store": "Alepa", "price": 1.99},
+
+    {"product": "Coffee", "store": "Lidl", "price": 4.99},
+    {"product": "Coffee", "store": "S-Market", "price": 5.99},
+    {"product": "Coffee", "store": "Prisma", "price": 5.49},
+    {"product": "Coffee", "store": "K-Citymarket", "price": 6.29},
+    {"product": "Coffee", "store": "K-Supermarket", "price": 6.49},
+    {"product": "Coffee", "store": "Alepa", "price": 6.79},
+
+    {"product": "Pasta", "store": "Lidl", "price": 0.69},
+    {"product": "Pasta", "store": "S-Market", "price": 0.99},
+    {"product": "Pasta", "store": "Prisma", "price": 0.89},
+    {"product": "Pasta", "store": "K-Citymarket", "price": 1.09},
+    {"product": "Pasta", "store": "K-Supermarket", "price": 1.15},
+    {"product": "Pasta", "store": "Alepa", "price": 1.19},
+
+    {"product": "Rice", "store": "Lidl", "price": 1.99},
+    {"product": "Rice", "store": "S-Market", "price": 2.49},
+    {"product": "Rice", "store": "Prisma", "price": 2.29},
+    {"product": "Rice", "store": "K-Citymarket", "price": 2.69},
+    {"product": "Rice", "store": "K-Supermarket", "price": 2.79},
+    {"product": "Rice", "store": "Alepa", "price": 2.89},
+
+    {"product": "Chicken", "store": "Lidl", "price": 6.99},
+    {"product": "Chicken", "store": "S-Market", "price": 7.99},
+    {"product": "Chicken", "store": "Prisma", "price": 7.49},
+    {"product": "Chicken", "store": "K-Citymarket", "price": 8.29},
+    {"product": "Chicken", "store": "K-Supermarket", "price": 8.49},
+    {"product": "Chicken", "store": "Alepa", "price": 8.79}
+  ]
+}

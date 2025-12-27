@@ -1,0 +1,304 @@
+const { sql } = require('@vercel/postgres');
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+// For Vercel deployment with puppeteer
+let chromium, puppeteer;
+try {
+  chromium = require('@sparticuz/chromium');
+  puppeteer = require('puppeteer-core');
+} catch (e) {
+  console.log('Puppeteer not available, using HTTP only');
+}
+
+// Common products to search for
+const commonProducts = [
+  'maito', 'leipä', 'juusto', 'kananmunat', 'tomaatti', 'kurkku',
+  'banaani', 'omena', 'peruna', 'porkkana', 'sipuli', 'kahvi',
+  'tee', 'sokeri', 'jauhot', 'riisi', 'pasta', 'jugurtti', 'voi'
+];
+
+// Helper: normalize product names
+function normalizeProductName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^\wåäö\s]/g, '')
+    .trim();
+}
+
+// Helper: find product match
+function findProductMatch(scrapedName, dbProducts) {
+  const normalized = normalizeProductName(scrapedName);
+  return dbProducts.find(p => {
+    const dbNorm = normalizeProductName(p.name);
+    return normalized.includes(dbNorm) || dbNorm.includes(normalized);
+  });
+}
+
+// Scraper: K-Ruoka (Kesko stores: K-City, K-Super)
+async function scrapeKRuoka() {
+  const products = [];
+
+  try {
+    // Try K-Ruoka API
+    for (const term of commonProducts.slice(0, 5)) {
+      try {
+        const response = await axios.get(
+          `https://www.k-ruoka.fi/kr-api/product/search`,
+          {
+            params: { query: term, pageNumber: 1, pageSize: 10 },
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json',
+              'Referer': 'https://www.k-ruoka.fi/'
+            },
+            timeout: 10000
+          }
+        );
+
+        if (response.data && response.data.results) {
+          for (const item of response.data.results) {
+            if (item.name && item.price) {
+              products.push({
+                name: item.name,
+                price: parseFloat(item.price),
+                unit: item.unit || item.salesUnit,
+                ean: item.ean
+              });
+            }
+          }
+        }
+
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        console.error(`K-Ruoka search for "${term}" failed:`, err.message);
+      }
+    }
+
+    console.log(`K-Ruoka: Found ${products.length} products`);
+    return products;
+  } catch (error) {
+    console.error('K-Ruoka scraper failed:', error.message);
+    return products;
+  }
+}
+
+// Scraper: S-Market/Prisma (SOK Group)
+async function scrapeSMarket() {
+  const products = [];
+
+  try {
+    // Try foodie.fm API (used by S-Kaupat)
+    for (const term of commonProducts.slice(0, 5)) {
+      try {
+        const response = await axios.get(
+          `https://www.foodie.fi/api/v1/products/search`,
+          {
+            params: { q: term, page: 0, size: 10 },
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json',
+              'Referer': 'https://www.foodie.fi/'
+            },
+            timeout: 10000
+          }
+        );
+
+        if (response.data && response.data.results) {
+          for (const item of response.data.results) {
+            if (item.name && item.price) {
+              products.push({
+                name: item.name,
+                price: parseFloat(item.price),
+                unit: item.unit,
+                ean: item.ean
+              });
+            }
+          }
+        }
+
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        console.error(`S-Market search for "${term}" failed:`, err.message);
+      }
+    }
+
+    console.log(`S-Market: Found ${products.length} products`);
+    return products;
+  } catch (error) {
+    console.error('S-Market scraper failed:', error.message);
+    return products;
+  }
+}
+
+// Scraper: Lidl (using puppeteer for JavaScript-heavy site)
+async function scrapeLidl() {
+  const products = [];
+
+  if (!puppeteer || !chromium) {
+    console.log('Lidl: Puppeteer not available, skipping');
+    return products;
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless
+    });
+
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+
+    // Navigate to Lidl product search
+    await page.goto('https://www.lidl.fi/tuotteet', {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    // Search for products
+    for (const term of commonProducts.slice(0, 3)) {
+      try {
+        await page.type('input[type="search"]', term);
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(2000);
+
+        const pageProducts = await page.evaluate(() => {
+          const items = [];
+          document.querySelectorAll('.product-grid-box').forEach(el => {
+            const nameEl = el.querySelector('.product-grid-box__title');
+            const priceEl = el.querySelector('.price');
+
+            if (nameEl && priceEl) {
+              const priceText = priceEl.textContent.replace(/[^0-9,.]/g, '').replace(',', '.');
+              items.push({
+                name: nameEl.textContent.trim(),
+                price: parseFloat(priceText)
+              });
+            }
+          });
+          return items;
+        });
+
+        products.push(...pageProducts);
+
+        // Clear search
+        await page.click('input[type="search"]', { clickCount: 3 });
+        await page.keyboard.press('Backspace');
+        await page.waitForTimeout(1000);
+      } catch (err) {
+        console.error(`Lidl search for "${term}" failed:`, err.message);
+      }
+    }
+
+    console.log(`Lidl: Found ${products.length} products`);
+  } catch (error) {
+    console.error('Lidl scraper failed:', error.message);
+  } finally {
+    if (browser) await browser.close();
+  }
+
+  return products;
+}
+
+// Main handler
+module.exports = async (req, res) => {
+  if (req.method !== 'POST' && req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const results = {
+    started: new Date().toISOString(),
+    stores: {},
+    summary: {
+      total_fetched: 0,
+      total_updated: 0,
+      errors: []
+    }
+  };
+
+  try {
+    // Get stores and products from database
+    const [storesResult, productsResult] = await Promise.all([
+      sql`SELECT id, name FROM stores`,
+      sql`SELECT id, name, category FROM products`
+    ]);
+
+    const stores = storesResult.rows;
+    const products = productsResult.rows;
+
+    console.log(`Processing ${stores.length} stores, ${products.length} products`);
+
+    // Scrape each store
+    for (const store of stores) {
+      const storeName = store.name.toLowerCase();
+      results.stores[store.name] = { status: 'pending', products: 0, matched: 0 };
+
+      try {
+        let scrapedData = [];
+
+        // Route to appropriate scraper
+        if (storeName.includes('k-city') || storeName.includes('k-super')) {
+          scrapedData = await scrapeKRuoka();
+        } else if (storeName.includes('s-market') || storeName.includes('prisma')) {
+          scrapedData = await scrapeSMarket();
+        } else if (storeName.includes('lidl')) {
+          scrapedData = await scrapeLidl();
+        } else if (storeName.includes('alepa')) {
+          scrapedData = await scrapeSMarket(); // Alepa uses SOK system
+        }
+
+        if (!scrapedData || scrapedData.length === 0) {
+          results.stores[store.name].status = 'no_data';
+          continue;
+        }
+
+        results.summary.total_fetched += scrapedData.length;
+
+        // Match and update prices
+        let matched = 0;
+        for (const item of scrapedData) {
+          const productMatch = findProductMatch(item.name, products);
+
+          if (productMatch && item.price > 0) {
+            try {
+              await sql`
+                INSERT INTO prices (product_id, store_id, price, recorded_at)
+                VALUES (${productMatch.id}, ${store.id}, ${item.price}, NOW())
+                ON CONFLICT (product_id, store_id)
+                DO UPDATE SET
+                  price = ${item.price},
+                  recorded_at = NOW()
+              `;
+              matched++;
+              results.summary.total_updated++;
+            } catch (dbErr) {
+              console.error(`DB insert failed for ${item.name}:`, dbErr.message);
+            }
+          }
+        }
+
+        results.stores[store.name].status = 'success';
+        results.stores[store.name].products = scrapedData.length;
+        results.stores[store.name].matched = matched;
+
+      } catch (error) {
+        results.stores[store.name].status = 'error';
+        results.stores[store.name].error = error.message;
+        results.summary.errors.push(`${store.name}: ${error.message}`);
+      }
+    }
+
+    results.completed = new Date().toISOString();
+    res.status(200).json(results);
+
+  } catch (error) {
+    console.error('Fetch prices failed:', error);
+    res.status(500).json({
+      error: error.message,
+      results
+    });
+  }
+};

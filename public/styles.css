@@ -1,445 +1,437 @@
 /* ╔══════════════════════════════════════════════════════════════╗
-   ║  SoExpensive - Monospace Terminal Aesthetic                 ║
-   ║  Inspired by classic terminal interfaces and retro computing║
+   ║  It's so expensive - Enhanced design with clear hierarchy   ║
    ╚══════════════════════════════════════════════════════════════╝ */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* ═══ Spacing System (8px base unit) ═══ */
 :root {
-    --bg: #fefefe;
-    --fg: #1a1a1a;
-    --accent: #2a9d8f;
-    --muted: #6b6b6b;
-    --border: #d0d0d0;
-    --highlight: #f0f8f7;
-    --green: #2a9d8f;
-    --char-width: 0.6em;
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --accent-green: #4ecdc4;
+    --accent-red: #ff6b6b;
 }
 
+/* Dark mode improved contrast */
+[style*="--text-color: #fff"] {
+    --text-color: #ededed !important;
+    --text-color-alt: #8a8a8a !important;
+    --background-color: #0a0a0a !important;
+}
+
+/* Wider layout */
 body {
-    font-family: 'Courier New', 'Monaco', 'Menlo', 'Consolas', 'Liberation Mono', monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    background: var(--bg);
-    color: var(--fg);
-    max-width: 100ch;
-    margin: 0 auto;
-    padding: 2ch;
-    -webkit-font-smoothing: auto;
-    -moz-osx-font-smoothing: auto;
+    max-width: calc(min(140ch, round(down, 100%, 1ch)));
 }
 
-/* ═══ Typography ═══ */
-h1, h2, h3 {
-    font-weight: bold;
-    margin: 2ch 0 1ch 0;
-    font-size: inherit;
-}
-
-h1 {
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 1ch;
-}
-
-a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--accent);
-}
-
-a:hover {
-    background: var(--highlight);
-}
-
-/* ═══ Header ═══ */
-header {
-    border: 1px solid var(--border);
-    padding: 1ch 2ch;
-    margin-bottom: 3ch;
-    background: var(--bg);
-}
-
-header h1 {
-    border: none;
-    margin: 0;
-    padding: 0;
-}
-
-header h1::before {
-    content: '$ ';
-    color: var(--accent);
-}
-
-.tagline {
-    color: var(--muted);
-    margin-top: 0.5ch;
-}
-
-.tagline::before {
-    content: '  ';
-}
-
-/* ═══ Summary Cards ═══ */
-.summary {
+/* ═══ 1. Two-column header layout ═══ */
+.site-header-grid {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2ch;
-    margin: 3ch 0;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--text-color);
 }
 
-.summary-card {
-    border: 1px solid var(--border);
-    padding: 1ch 2ch;
+/* Theme toggle in top right of header */
+.theme-toggle-header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-color-alt);
+    text-align: right;
+    white-space: nowrap;
+    min-height: 20px;
 }
 
-.summary-card h3 {
-    margin: 0 0 0.5ch 0;
-    color: var(--muted);
-    font-size: 1em;
-}
-
-.summary-card h3::before {
-    content: '┌─ ';
-}
-
-.summary-value {
-    font-size: 2em;
-    font-weight: bold;
-    color: var(--accent);
-}
-
-/* ═══ Filters ═══ */
-.filters {
-    border: 1px solid var(--border);
-    padding: 2ch;
-    margin: 3ch 0;
-    background: var(--bg);
-}
-
-.filters::before {
-    content: '╔═ FILTERS ═══════════════════════════════════════════════╗';
-    display: block;
-    margin-bottom: 1ch;
-    color: var(--muted);
-}
-
-.filter-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2ch;
-}
-
-.filter-group {
+.header-left {
     display: flex;
     flex-direction: column;
-    gap: 0.5ch;
+    gap: var(--space-2);
 }
 
-.filter-group label {
-    color: var(--muted);
+.header-right {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    justify-content: center;
+    padding: var(--space-3);
+    background: var(--background-color-alt);
+    min-height: 200px;
 }
 
-.filter-group label::after {
-    content: ':';
+.site-title {
+    font-size: 3rem;
+    line-height: 1.2;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
 }
 
-input[type="text"],
-select {
-    font-family: inherit;
-    font-size: inherit;
-    padding: 0.5ch 1ch;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--fg);
+.site-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-color-alt);
+    margin: 0;
+    font-weight: var(--font-weight-normal);
 }
 
-input[type="text"]:focus,
-select:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-    background: var(--highlight);
+.meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: 0.9rem;
+    color: var(--text-color-alt);
+    margin-top: var(--space-2);
 }
 
-/* ═══ Products Table ═══ */
-.products-section {
-    margin: 3ch 0;
+.meta-info strong {
+    color: var(--text-color);
 }
 
-.products-section h2 {
-    margin-bottom: 1ch;
+.insight-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
-.products-section h2::before {
-    content: '╔═ PRODUCTS ';
+.insight-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-color-alt);
+    letter-spacing: 0.05em;
 }
 
-.products-section h2::after {
-    content: '════════════════════════════════════════╗';
+.insight-value {
+    font-size: 1.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color);
+    min-height: 1.8rem;
 }
 
-.products-table-container {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    background: var(--bg);
+/* ═══ 3. Section Headers ═══ */
+h2 {
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.05em;
+    margin: var(--space-4) 0 var(--space-3) 0;
+    color: var(--text-color);
 }
 
-table {
+hr {
+    margin: var(--space-4) 0;
+    border: none;
+    border-top: 1px solid var(--text-color);
+    opacity: 0.3;
+}
+
+/* ═══ 4. Filter Block (grouped, no boxes) ═══ */
+.filter-block {
+    margin: var(--space-3) 0;
+}
+
+.filter-label {
+    display: block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: var(--text-color-alt);
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+}
+
+.filter-grid input,
+.filter-grid select {
+    min-height: 44px; /* Better touch target */
+}
+
+/* ═══ 5. Loading States ═══ */
+.loading-state {
+    text-align: center;
+    padding: var(--space-4);
+    color: var(--text-color-alt);
+}
+
+.loading-text {
+    font-weight: var(--font-weight-medium);
+}
+
+.loading-dots {
+    display: inline-block;
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* Loading skeleton animation */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--background-color-alt) 0%,
+        var(--background-color) 50%,
+        var(--background-color-alt) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 2px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-row {
+    height: 40px;
+}
+
+.skeleton-text {
+    display: inline-block;
+    height: 1em;
     width: 100%;
-    border-collapse: collapse;
-    font-size: 1em;
 }
 
-thead {
-    border-bottom: 1px solid var(--border);
+.skeleton-text.short {
+    width: 60%;
 }
 
-th {
-    padding: 1ch 1.5ch;
-    text-align: left;
-    font-weight: bold;
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    border-right: 1px dotted var(--border);
+.skeleton-text.medium {
+    width: 80%;
 }
 
-th:last-child {
-    border-right: none;
+.skeleton-chart {
+    height: 400px;
+    width: 100%;
 }
 
-td {
-    padding: 0.75ch 1.5ch;
-    border-top: 1px dotted var(--border);
-    border-right: 1px dotted var(--border);
-}
-
-td:last-child {
-    border-right: none;
-}
-
-tbody tr {
-    cursor: pointer;
-}
-
-tbody tr:hover {
-    background: var(--highlight);
-}
-
-.product-name {
-    font-weight: bold;
-}
-
-.product-category {
-    color: var(--muted);
-    font-size: 0.9em;
-}
-
-.product-category::before {
-    content: '[';
-}
-
-.product-category::after {
-    content: ']';
-}
-
-.price {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.price.cheapest {
-    color: var(--green);
-    font-weight: bold;
-}
-
-.price.cheapest::before {
-    content: '→ ';
-}
-
-.price.cheapest::after {
-    content: ' ✓';
-}
-
-.no-price {
-    color: var(--muted);
-    text-align: center;
-}
-
-.no-price::before {
-    content: '[';
-}
-
-.no-price::after {
-    content: ']';
-}
-
-/* ═══ Loading ═══ */
-.loading {
-    text-align: center;
-    padding: 4ch;
-    color: var(--muted);
-}
-
-.loading::before {
-    content: '[ ';
-}
-
-.loading::after {
-    content: ' ]';
+.skeleton-table {
+    height: 300px;
+    width: 100%;
 }
 
 .hidden {
     display: none !important;
 }
 
-/* ═══ Modal ═══ */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(26, 26, 26, 0.9);
-    z-index: 1000;
-    padding: 4ch;
+/* ═══ 6. Tables - Improved readability ═══ */
+.table-container {
+    overflow-x: auto;
+    margin: var(--space-3) 0;
 }
 
-.modal.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.products-table tbody tr:nth-child(even) {
+    background: var(--background-color-alt);
 }
 
-.modal-content {
-    background: var(--bg);
-    border: 2px solid var(--border);
-    padding: 3ch;
-    max-width: 90ch;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
+.products-table thead th {
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    font-weight: var(--font-weight-bold);
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 2ch;
-    padding-bottom: 1ch;
-    border-bottom: 1px dashed var(--border);
+/* Sticky first column on mobile */
+.sticky-col {
+    position: sticky;
+    left: 0;
+    background: var(--background-color);
+    z-index: 1;
 }
 
-.modal-header h2 {
+.products-table tbody tr:nth-child(even) .sticky-col {
+    background: var(--background-color-alt);
+}
+
+/* ═══ 7. Price Highlighting with Accent ═══ */
+.price {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-color-alt);
+}
+
+.price.cheapest {
+    font-weight: var(--font-weight-bold);
+    color: var(--accent-green);
+}
+
+.price.cheapest::before {
+    content: '→ ';
+}
+
+/* De-emphasize non-cheapest prices */
+.products-table td:not(.price.cheapest).price {
+    opacity: 0.6;
+}
+
+/* ═══ 8. Store Rankings ═══ */
+.rank-1 {
+    font-weight: var(--font-weight-bold);
+    color: var(--accent-green);
+}
+
+.rank-1::before {
+    content: '#';
+}
+
+/* ═══ 9. Chart Section ═══ */
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    margin: var(--space-3) 0;
+}
+
+.chart-figure {
     margin: 0;
+    min-height: 400px;
 }
 
-.modal-header h2::before {
-    content: '╔═ ';
-    color: var(--muted);
+#asciiChart {
+    display: block;
+    white-space: pre;
+    margin: 0;
+    overflow-x: auto;
 }
 
-.modal-close {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    font-family: inherit;
-    font-size: 1em;
-    cursor: pointer;
-    padding: 0.5ch 2ch;
-    color: var(--fg);
+.chart-table {
+    display: flex;
+    align-items: start;
+    min-height: 300px;
 }
 
-.modal-close::before {
-    content: '[ ';
+figcaption {
+    min-height: 20px;
 }
 
-.modal-close::after {
-    content: ' ]';
+.products-section {
+    min-height: 500px;
 }
 
-.modal-close:hover {
-    background: var(--highlight);
-    border-color: var(--accent);
-}
-
-.chart-container {
-    margin: 2ch 0;
-    min-height: 40ch;
-    border: 1px dotted var(--border);
-    padding: 2ch;
-}
-
-/* ═══ Responsive ═══ */
+/* ═══ 10. Responsive ═══ */
 @media (max-width: 768px) {
     body {
-        font-size: 12px;
-        padding: 1ch;
+        padding: var(--space-2);
     }
 
-    .summary {
+    .site-title {
+        font-size: 2rem;
+    }
+
+    .site-header-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .header-right {
+        padding: var(--space-2);
+        gap: var(--space-2);
+        min-height: auto;
+    }
+
+    .header-left {
+        gap: var(--space-1);
+    }
+
+    .insight-item {
+        gap: 4px;
+    }
+
+    .insight-label {
+        font-size: 0.75rem;
+    }
+
+    .insight-value {
+        font-size: 1.2rem;
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+
+    .filter-grid {
         grid-template-columns: 1fr;
     }
 
-    .filter-container {
-        grid-template-columns: 1fr;
+    /* Improve table readability on mobile */
+    .table-container {
+        margin-left: calc(-1 * var(--space-2));
+        margin-right: calc(-1 * var(--space-2));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
-    table {
-        font-size: 0.9em;
+    .products-table {
+        font-size: 0.8rem;
     }
 
-    th, td {
-        padding: 0.5ch 1ch;
+    .products-table th,
+    .products-table td {
+        padding: var(--space-1);
+        white-space: nowrap;
     }
 
-    .modal-content {
-        padding: 2ch;
+    /* Make store table more compact */
+    #storeTable {
+        font-size: 0.9rem;
+    }
+
+    #storeTable th,
+    #storeTable td {
+        padding: var(--space-1);
+    }
+
+    /* Adjust chart for mobile */
+    #asciiChart {
+        font-size: 0.7rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    figcaption {
+        font-size: 0.75rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+        margin: var(--space-3) 0 var(--space-2) 0;
     }
 }
 
 @media (max-width: 480px) {
-    body {
-        font-size: 11px;
+    .site-title {
+        font-size: 1.75rem;
     }
 
-    .summary-value {
-        font-size: 1.5em;
-    }
-}
-
-/* ═══ Print ═══ */
-@media print {
-    body {
-        background: white;
-        color: black;
-        font-size: 10pt;
+    .site-subtitle {
+        font-size: 0.95rem;
     }
 
-    .filters,
-    .modal-close {
-        display: none;
+    .meta-info {
+        font-size: 0.8rem;
     }
 
-    table {
-        page-break-inside: avoid;
+    .products-table {
+        font-size: 0.75rem;
     }
 
-    thead {
-        display: table-header-group;
+    .insight-value {
+        font-size: 1.1rem;
     }
-}
 
-/* ═══ Accessibility ═══ */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        transition: none !important;
-    }
-}
-
-@media (prefers-contrast: high) {
-    :root {
-        --border: #000;
-        --muted: #000;
+    #asciiChart {
+        font-size: 0.6rem;
     }
 }
