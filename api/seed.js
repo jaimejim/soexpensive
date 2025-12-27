@@ -190,16 +190,23 @@ module.exports = async (req, res) => {
       results.stores++;
     }
 
-    // Add products
-    const productIds = [];
+    // Add products (deduplicate in case of conflicts)
+    const productMap = new Map();
     for (const product of products) {
       const result = await db.addProduct(product.name, product.category, product.unit);
-      productIds.push({
-        id: result.lastInsertRowid,
-        priceRange: product.priceRange
-      });
-      results.products++;
+      const key = `${product.name}-${product.category}-${product.unit}`;
+
+      // Only add if not already in map (prevents duplicates from ON CONFLICT)
+      if (!productMap.has(key)) {
+        productMap.set(key, {
+          id: result.lastInsertRowid,
+          priceRange: product.priceRange
+        });
+        results.products++;
+      }
     }
+
+    const productIds = Array.from(productMap.values());
 
     // Add current prices - using Promise.all for parallel inserts
     const pricePromises = [];
