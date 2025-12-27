@@ -214,8 +214,9 @@ function renderProducts() {
 // Generate ASCII bar chart
 function generateASCIIChart(storeStats) {
     const maxCount = Math.max(...storeStats.map(s => s.cheapestCount));
-    const maxHeight = 10;
-    const barWidth = 10;
+    const maxHeight = 15; // More vertical space
+    const barWidth = 4;   // Narrower bars
+    const barSpacing = 10; // Space between bars
 
     let chart = '';
 
@@ -224,10 +225,8 @@ function generateASCIIChart(storeStats) {
         const threshold = (row / maxHeight) * maxCount;
         let line = '';
 
-        // Add Y-axis label
-        if (row === maxHeight || row === 0) {
-            line += String(Math.round(threshold)).padStart(3, ' ') + ' │ ';
-        } else if (row === Math.floor(maxHeight / 2)) {
+        // Add Y-axis label every 3 rows
+        if (row % 3 === 0) {
             line += String(Math.round(threshold)).padStart(3, ' ') + ' │ ';
         } else {
             line += '    │ ';
@@ -244,32 +243,42 @@ function generateASCIIChart(storeStats) {
             }
 
             if (index < storeStats.length - 1) {
-                line += '  ';
+                line += ' '.repeat(barSpacing);
             }
         });
 
         chart += line + '\n';
     }
 
-    // Add X-axis
+    // Add X-axis with corner and bar bases
     chart += '  0 └';
     storeStats.forEach((store, index) => {
-        chart += '─'.repeat(barWidth);
+        chart += '─'.repeat(Math.floor(barWidth / 2));
+        chart += '▀';
+        chart += '─'.repeat(Math.floor(barWidth / 2) - 1);
         if (index < storeStats.length - 1) {
-            chart += '──';
+            chart += '─'.repeat(barSpacing);
         }
     });
     chart += '\n';
 
-    // Add labels
-    chart += '      ';
+    // Add labels centered below each bar
+    const firstBarOffset = 6; // Account for "  0 └─"
+    chart += ' '.repeat(firstBarOffset);
+
     storeStats.forEach((store, index) => {
-        const shortName = store.name.length > barWidth
-            ? store.name.substring(0, barWidth - 1) + '…'
-            : store.name.padEnd(barWidth, ' ');
-        chart += shortName;
+        // Calculate centering for the label
+        const labelWidth = barWidth + barSpacing;
+        const nameLen = Math.min(store.name.length, labelWidth - 2);
+        const name = store.name.substring(0, nameLen);
+        const leftPad = Math.floor((labelWidth - nameLen) / 2);
+
+        chart += ' '.repeat(leftPad);
+        chart += name;
+
         if (index < storeStats.length - 1) {
-            chart += '  ';
+            const rightPad = labelWidth - leftPad - nameLen;
+            chart += ' '.repeat(rightPad);
         }
     });
 
