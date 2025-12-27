@@ -270,7 +270,6 @@ hr {
     }
 
     .header-right {
-        order: -1; /* Move stats above on mobile */
         padding: var(--space-2);
     }
 
