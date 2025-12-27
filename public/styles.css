@@ -256,30 +256,91 @@ hr {
 
 /* ═══ 10. Responsive ═══ */
 @media (max-width: 768px) {
+    body {
+        padding: var(--space-2);
+    }
+
     .site-title {
         font-size: 2rem;
     }
 
     .site-header-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-2);
     }
 
     .header-right {
         order: -1; /* Move stats above on mobile */
+        padding: var(--space-2);
+    }
+
+    .header-left {
+        gap: var(--space-1);
+    }
+
+    .insight-item {
+        gap: 4px;
+    }
+
+    .insight-label {
+        font-size: 0.75rem;
+    }
+
+    .insight-value {
+        font-size: 1.2rem;
     }
 
     .chart-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-3);
     }
 
     .filter-grid {
         grid-template-columns: 1fr;
     }
 
-    /* Make table scroll horizontally */
+    /* Improve table readability on mobile */
     .table-container {
         margin-left: calc(-1 * var(--space-2));
         margin-right: calc(-1 * var(--space-2));
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .products-table {
+        font-size: 0.8rem;
+    }
+
+    .products-table th,
+    .products-table td {
+        padding: var(--space-1);
+        white-space: nowrap;
+    }
+
+    /* Make store table more compact */
+    #storeTable {
+        font-size: 0.9rem;
+    }
+
+    #storeTable th,
+    #storeTable td {
+        padding: var(--space-1);
+    }
+
+    /* Adjust chart for mobile */
+    #asciiChart {
+        font-size: 0.7rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    figcaption {
+        font-size: 0.75rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+        margin: var(--space-3) 0 var(--space-2) 0;
     }
 }
 
@@ -288,7 +349,23 @@ hr {
         font-size: 1.75rem;
     }
 
+    .site-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .meta-info {
+        font-size: 0.8rem;
+    }
+
     .products-table {
-        font-size: 0.85em;
+        font-size: 0.75rem;
+    }
+
+    .insight-value {
+        font-size: 1.1rem;
+    }
+
+    #asciiChart {
+        font-size: 0.6rem;
     }
 }
