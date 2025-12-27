@@ -24,27 +24,25 @@ body {
     max-width: calc(min(140ch, round(down, 100%, 1ch)));
 }
 
-/* Theme toggle in top right corner */
-.theme-toggle-corner {
-    position: fixed;
-    top: var(--space-2);
-    right: var(--space-2);
-    cursor: pointer;
-    font-size: 0.9rem;
-    z-index: 100;
-    background: var(--background-color);
-    padding: var(--space-1);
-    border: 1px solid var(--text-color);
-}
-
 /* ═══ 1. Two-column header layout ═══ */
 .site-header-grid {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-4);
     margin-bottom: var(--space-4);
     padding-bottom: var(--space-4);
     border-bottom: 1px solid var(--text-color);
+}
+
+/* Theme toggle in top right of header */
+.theme-toggle-header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-color-alt);
 }
 
 .header-left {
