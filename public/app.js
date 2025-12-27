@@ -305,8 +305,26 @@ function updateStoreComparison() {
 
 // Update metadata
 function updateMetadata() {
-    document.getElementById('metaProducts').textContent = `${allProducts.length} products tracked`;
+    document.getElementById('metaProducts').textContent = allProducts.length;
     document.getElementById('metaLastUpdate').textContent = new Date().toLocaleDateString('fi-FI');
+
+    // Calculate cheapest overall store
+    const storeTotals = {};
+    STORE_ORDER.forEach(store => {
+        storeTotals[store] = 0;
+    });
+
+    allProducts.forEach(product => {
+        const cheapestStore = getCheapestStore(product);
+        if (cheapestStore) {
+            storeTotals[cheapestStore]++;
+        }
+    });
+
+    const cheapestOverall = Object.entries(storeTotals)
+        .sort((a, b) => b[1] - a[1])[0];
+
+    document.getElementById('metaCheapest').textContent = cheapestOverall ? cheapestOverall[0] : '--';
 }
 
 // Show price history modal
