@@ -1,55 +1,207 @@
 const { sql } = require('@vercel/postgres');
 
+// Common products to search for (expand this list)
+const commonProducts = [
+  'maito', 'leipä', 'juusto', 'kananmunat', 'tomaatti', 'kurkku',
+  'banaani', 'omena', 'peruna', 'porkkana', 'sipuli', 'kahvi',
+  'tee', 'sokeri', 'jauhot', 'riisi', 'pasta', 'jugurtti', 'voi',
+  'margariini', 'kinkku', 'meetvursti', 'olut', 'limonaadi'
+];
+
+// Helper function to normalize product names for matching
+function normalizeProductName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^\wåäö\s]/g, '')
+    .trim();
+}
+
+// Helper function to match scraped product to database product
+function findProductMatch(scrapedName, dbProducts) {
+  const normalized = normalizeProductName(scrapedName);
+
+  return dbProducts.find(p => {
+    const dbNorm = normalizeProductName(p.name);
+    return normalized.includes(dbNorm) || dbNorm.includes(normalized);
+  });
+}
+
 // Store-specific scraping functions
 const scrapers = {
-  async scrapeLidl() {
-    // Lidl blocks direct requests, would need headless browser
-    // For now, return mock data
-    return null;
-  },
-
+  // K-Ruoka API (K-Citymarket, K-Supermarket)
   async scrapeKRuoka() {
-    // K-Ruoka has an API: https://www.k-ruoka.fi/kr-api/product/search
+    const products = [];
+
     try {
-      const response = await fetch('https://www.k-ruoka.fi/kr-api/product/search?query=maito&pageNumber=1', {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; PriceBot/1.0)'
+      for (const searchTerm of commonProducts.slice(0, 10)) {
+        const url = `https://www.k-ruoka.fi/kr-api/product/search?query=${encodeURIComponent(searchTerm)}&pageNumber=1&pageSize=20`;
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+
+        if (data.results && Array.isArray(data.results)) {
+          for (const item of data.results) {
+            if (item.name && item.price) {
+              products.push({
+                name: item.name,
+                price: parseFloat(item.price),
+                unit: item.unitPriceUnit || item.unit,
+                ean: item.ean
+              });
+            }
+          }
         }
-      });
 
-      if (!response.ok) return null;
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
 
-      const data = await response.json();
-      return data.results || [];
+      console.log(`K-Ruoka: Found ${products.length} products`);
+      return products;
     } catch (error) {
-      console.error('K-Ruoka scrape failed:', error);
-      return null;
+      console.error('K-Ruoka scrape failed:', error.message);
+      return products;
     }
   },
 
+  // S-Market/Prisma API (SOK Group)
   async scrapeSMarket() {
-    // S-Market uses Kesko's API similar to K-Ruoka
+    const products = [];
+
     try {
-      const response = await fetch('https://www.s-kaupat.fi/tuotteet/api/products?search=maito', {
+      // Try the Foodie.fm API used by S-Kaupat
+      for (const searchTerm of commonProducts.slice(0, 10)) {
+        const url = `https://www.foodie.fi/api/products/search?term=${encodeURIComponent(searchTerm)}&limit=20`;
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          // Try alternative endpoint
+          const altUrl = `https://www.s-kaupat.fi/api/search?query=${encodeURIComponent(searchTerm)}`;
+          const altResponse = await fetch(altUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!altResponse.ok) continue;
+
+          const altData = await altResponse.json();
+          if (altData.products && Array.isArray(altData.products)) {
+            for (const item of altData.products) {
+              if (item.name && item.price) {
+                products.push({
+                  name: item.name,
+                  price: parseFloat(item.price),
+                  unit: item.unit,
+                  ean: item.ean
+                });
+              }
+            }
+          }
+          continue;
+        }
+
+        const data = await response.json();
+
+        if (data.products && Array.isArray(data.products)) {
+          for (const item of data.products) {
+            if (item.name && item.price) {
+              products.push({
+                name: item.name,
+                price: parseFloat(item.price),
+                unit: item.unit,
+                ean: item.ean
+              });
+            }
+          }
+        }
+
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      console.log(`S-Market: Found ${products.length} products`);
+      return products;
+    } catch (error) {
+      console.error('S-Market scrape failed:', error.message);
+      return products;
+    }
+  },
+
+  // Lidl scraper
+  async scrapeLidl() {
+    const products = [];
+
+    try {
+      // Lidl Finland product API
+      const url = 'https://www.lidl.fi/api/products';
+
+      const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; PriceBot/1.0)'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json'
         }
       });
 
-      if (!response.ok) return null;
+      if (!response.ok) {
+        console.log('Lidl API not accessible, trying alternative method');
+        return products;
+      }
 
       const data = await response.json();
-      return data.products || [];
+
+      if (data.products && Array.isArray(data.products)) {
+        for (const item of data.products) {
+          if (item.name && item.price) {
+            products.push({
+              name: item.name,
+              price: parseFloat(item.price),
+              unit: item.unit,
+              ean: item.ean
+            });
+          }
+        }
+      }
+
+      console.log(`Lidl: Found ${products.length} products`);
+      return products;
     } catch (error) {
-      console.error('S-Market scrape failed:', error);
-      return null;
+      console.error('Lidl scrape failed:', error.message);
+      return products;
     }
+  },
+
+  // Alepa (part of SOK, similar to S-Market)
+  async scrapeAlepa() {
+    // Alepa uses same system as S-Market
+    return this.scrapeSMarket();
+  },
+
+  // Prisma (part of SOK, similar to S-Market)
+  async scrapePrisma() {
+    // Prisma uses same system as S-Market
+    return this.scrapeSMarket();
   }
 };
 
 module.exports = async (req, res) => {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
+  // Allow both POST and GET for testing
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -72,21 +224,27 @@ module.exports = async (req, res) => {
     const productsResult = await sql`SELECT id, name, category FROM products`;
     const products = productsResult.rows;
 
+    console.log(`Processing ${stores.length} stores and ${products.length} products`);
+
     // Attempt to scrape each store
     for (const store of stores) {
       const storeName = store.name;
-      results.stores[storeName] = { status: 'pending', products: 0 };
+      results.stores[storeName] = { status: 'pending', products: 0, matched: 0 };
 
       try {
-        let scrapedData = null;
+        let scrapedData = [];
 
         // Try different scrapers based on store name
-        if (storeName.includes('K-')) {
+        if (storeName.toLowerCase().includes('k-city') || storeName.toLowerCase().includes('k-super')) {
           scrapedData = await scrapers.scrapeKRuoka();
-        } else if (storeName.includes('S-')) {
+        } else if (storeName.toLowerCase().includes('s-market')) {
           scrapedData = await scrapers.scrapeSMarket();
-        } else if (storeName === 'Lidl') {
+        } else if (storeName.toLowerCase().includes('prisma')) {
+          scrapedData = await scrapers.scrapePrisma();
+        } else if (storeName.toLowerCase().includes('lidl')) {
           scrapedData = await scrapers.scrapeLidl();
+        } else if (storeName.toLowerCase().includes('alepa')) {
+          scrapedData = await scrapers.scrapeAlepa();
         }
 
         if (!scrapedData || scrapedData.length === 0) {
@@ -94,19 +252,20 @@ module.exports = async (req, res) => {
           continue;
         }
 
+        results.summary.total_fetched += scrapedData.length;
+
         // Match scraped products to our database products
         let matched = 0;
         for (const scrapedProduct of scrapedData) {
-          const productMatch = products.find(p =>
-            p.name.toLowerCase().includes(scrapedProduct.name?.toLowerCase()) ||
-            scrapedProduct.name?.toLowerCase().includes(p.name.toLowerCase())
-          );
+          const productMatch = findProductMatch(scrapedProduct.name, products);
 
-          if (productMatch && scrapedProduct.price) {
-            // Insert new price
+          if (productMatch && scrapedProduct.price > 0) {
+            // Insert or update price
             await sql`
               INSERT INTO prices (product_id, store_id, price, recorded_at)
               VALUES (${productMatch.id}, ${store.id}, ${scrapedProduct.price}, NOW())
+              ON CONFLICT (product_id, store_id)
+              DO UPDATE SET price = ${scrapedProduct.price}, recorded_at = NOW()
             `;
             matched++;
             results.summary.total_updated++;
@@ -114,8 +273,8 @@ module.exports = async (req, res) => {
         }
 
         results.stores[storeName].status = 'success';
-        results.stores[storeName].products = matched;
-        results.summary.total_fetched += scrapedData.length;
+        results.stores[storeName].products = scrapedData.length;
+        results.stores[storeName].matched = matched;
 
       } catch (error) {
         results.stores[storeName].status = 'error';
