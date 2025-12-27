@@ -252,6 +252,74 @@ function updateSummary() {
     `;
 }
 
+// Generate ASCII bar chart
+function generateASCIIChart(storeStats) {
+    const maxCount = Math.max(...storeStats.map(s => s.cheapestCount));
+    const maxHeight = 12;
+    const barWidth = 10;
+
+    // Find max name length for spacing
+    const maxNameLength = Math.max(...storeStats.map(s => s.name.length));
+
+    let chart = '';
+
+    // Draw bars from top to bottom
+    for (let row = maxHeight; row >= 0; row--) {
+        const threshold = (row / maxHeight) * maxCount;
+        let line = '';
+
+        // Add Y-axis label
+        if (row === maxHeight || row === 0) {
+            line += String(Math.round(threshold)).padStart(3, ' ') + ' │ ';
+        } else if (row === Math.floor(maxHeight / 2)) {
+            line += String(Math.round(threshold)).padStart(3, ' ') + ' │ ';
+        } else {
+            line += '    │ ';
+        }
+
+        // Add bars
+        storeStats.forEach((store, index) => {
+            const barHeight = (store.cheapestCount / maxCount) * maxHeight;
+
+            if (barHeight >= row) {
+                line += '█'.repeat(barWidth);
+            } else {
+                line += ' '.repeat(barWidth);
+            }
+
+            if (index < storeStats.length - 1) {
+                line += '  ';
+            }
+        });
+
+        chart += line + '\n';
+    }
+
+    // Add X-axis
+    chart += '  0 └';
+    storeStats.forEach((store, index) => {
+        chart += '─'.repeat(barWidth);
+        if (index < storeStats.length - 1) {
+            chart += '──';
+        }
+    });
+    chart += '\n';
+
+    // Add labels
+    chart += '      ';
+    storeStats.forEach((store, index) => {
+        const shortName = store.name.length > barWidth
+            ? store.name.substring(0, barWidth - 1) + '…'
+            : store.name.padEnd(barWidth, ' ');
+        chart += shortName;
+        if (index < storeStats.length - 1) {
+            chart += '  ';
+        }
+    });
+
+    return chart;
+}
+
 // Update store comparison table
 function updateStoreComparison() {
     const tbody = document.getElementById('storeComparisonBody');
@@ -286,6 +354,10 @@ function updateStoreComparison() {
 
     // Sort by cheapest count (descending)
     storeStats.sort((a, b) => b.cheapestCount - a.cheapestCount);
+
+    // Generate and display ASCII chart
+    const chart = generateASCIIChart(storeStats);
+    document.getElementById('asciiChart').textContent = chart;
 
     // Render table
     tbody.innerHTML = storeStats.map((store, index) => {

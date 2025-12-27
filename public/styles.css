@@ -399,6 +399,32 @@ tbody tr:hover {
     content: '══════════════════════════════════╗';
 }
 
+.ascii-chart {
+    margin: 2ch 0 3ch 0;
+    padding: 2ch;
+    background: var(--table-bg);
+    border: 1px dotted var(--border);
+}
+
+.ascii-chart h3 {
+    margin: 0 0 1ch 0;
+    color: var(--muted);
+    font-size: 1em;
+}
+
+.ascii-chart h3::before {
+    content: '┌─ ';
+}
+
+.ascii-chart pre {
+    font-family: inherit;
+    font-size: 0.9em;
+    line-height: 1.4;
+    overflow-x: auto;
+    color: var(--fg);
+    margin: 0;
+}
+
 .store-comparison table {
     width: 100%;
 }
