@@ -299,6 +299,13 @@ hr {
     min-height: 400px;
 }
 
+#asciiChart {
+    display: block;
+    white-space: pre;
+    margin: 0;
+    overflow-x: auto;
+}
+
 .chart-table {
     display: flex;
     align-items: start;
@@ -388,7 +395,6 @@ figcaption {
     /* Adjust chart for mobile */
     #asciiChart {
         font-size: 0.7rem;
-        overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
 
