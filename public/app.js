@@ -217,7 +217,7 @@ function generateASCIIChart(storeStats) {
     const maxAvailable = Math.max(...storeStats.map(s => s.availableCount));
     const maxHeight = 15; // Vertical space
     const barWidth = 1;   // Single character width
-    const barSpacing = 14; // Space between bars
+    const barSpacing = 8; // Space between bars
 
     let chart = '';
 
