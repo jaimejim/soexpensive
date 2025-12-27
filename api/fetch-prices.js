@@ -1,14 +1,24 @@
 const { sql } = require('@vercel/postgres');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
-// Common products to search for (expand this list)
+// For Vercel deployment with puppeteer
+let chromium, puppeteer;
+try {
+  chromium = require('@sparticuz/chromium');
+  puppeteer = require('puppeteer-core');
+} catch (e) {
+  console.log('Puppeteer not available, using HTTP only');
+}
+
+// Common products to search for
 const commonProducts = [
   'maito', 'leipä', 'juusto', 'kananmunat', 'tomaatti', 'kurkku',
   'banaani', 'omena', 'peruna', 'porkkana', 'sipuli', 'kahvi',
-  'tee', 'sokeri', 'jauhot', 'riisi', 'pasta', 'jugurtti', 'voi',
-  'margariini', 'kinkku', 'meetvursti', 'olut', 'limonaadi'
+  'tee', 'sokeri', 'jauhot', 'riisi', 'pasta', 'jugurtti', 'voi'
 ];
 
-// Helper function to normalize product names for matching
+// Helper: normalize product names
 function normalizeProductName(name) {
   return name
     .toLowerCase()
@@ -16,110 +26,86 @@ function normalizeProductName(name) {
     .trim();
 }
 
-// Helper function to match scraped product to database product
+// Helper: find product match
 function findProductMatch(scrapedName, dbProducts) {
   const normalized = normalizeProductName(scrapedName);
-
   return dbProducts.find(p => {
     const dbNorm = normalizeProductName(p.name);
     return normalized.includes(dbNorm) || dbNorm.includes(normalized);
   });
 }
 
-// Store-specific scraping functions
-const scrapers = {
-  // K-Ruoka API (K-Citymarket, K-Supermarket)
-  async scrapeKRuoka() {
-    const products = [];
+// Scraper: K-Ruoka (Kesko stores: K-City, K-Super)
+async function scrapeKRuoka() {
+  const products = [];
 
-    try {
-      for (const searchTerm of commonProducts.slice(0, 10)) {
-        const url = `https://www.k-ruoka.fi/kr-api/product/search?query=${encodeURIComponent(searchTerm)}&pageNumber=1&pageSize=20`;
-
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json'
+  try {
+    // Try K-Ruoka API
+    for (const term of commonProducts.slice(0, 5)) {
+      try {
+        const response = await axios.get(
+          `https://www.k-ruoka.fi/kr-api/product/search`,
+          {
+            params: { query: term, pageNumber: 1, pageSize: 10 },
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'application/json',
+              'Referer': 'https://www.k-ruoka.fi/'
+            },
+            timeout: 10000
           }
-        });
+        );
 
-        if (!response.ok) continue;
-
-        const data = await response.json();
-
-        if (data.results && Array.isArray(data.results)) {
-          for (const item of data.results) {
+        if (response.data && response.data.results) {
+          for (const item of response.data.results) {
             if (item.name && item.price) {
               products.push({
                 name: item.name,
                 price: parseFloat(item.price),
-                unit: item.unitPriceUnit || item.unit,
+                unit: item.unit || item.salesUnit,
                 ean: item.ean
               });
             }
           }
         }
 
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        console.error(`K-Ruoka search for "${term}" failed:`, err.message);
       }
-
-      console.log(`K-Ruoka: Found ${products.length} products`);
-      return products;
-    } catch (error) {
-      console.error('K-Ruoka scrape failed:', error.message);
-      return products;
     }
-  },
 
-  // S-Market/Prisma API (SOK Group)
-  async scrapeSMarket() {
-    const products = [];
+    console.log(`K-Ruoka: Found ${products.length} products`);
+    return products;
+  } catch (error) {
+    console.error('K-Ruoka scraper failed:', error.message);
+    return products;
+  }
+}
 
-    try {
-      // Try the Foodie.fm API used by S-Kaupat
-      for (const searchTerm of commonProducts.slice(0, 10)) {
-        const url = `https://www.foodie.fi/api/products/search?term=${encodeURIComponent(searchTerm)}&limit=20`;
+// Scraper: S-Market/Prisma (SOK Group)
+async function scrapeSMarket() {
+  const products = [];
 
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          // Try alternative endpoint
-          const altUrl = `https://www.s-kaupat.fi/api/search?query=${encodeURIComponent(searchTerm)}`;
-          const altResponse = await fetch(altUrl, {
+  try {
+    // Try foodie.fm API (used by S-Kaupat)
+    for (const term of commonProducts.slice(0, 5)) {
+      try {
+        const response = await axios.get(
+          `https://www.foodie.fi/api/v1/products/search`,
+          {
+            params: { q: term, page: 0, size: 10 },
             headers: {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-              'Accept': 'application/json'
-            }
-          });
-
-          if (!altResponse.ok) continue;
-
-          const altData = await altResponse.json();
-          if (altData.products && Array.isArray(altData.products)) {
-            for (const item of altData.products) {
-              if (item.name && item.price) {
-                products.push({
-                  name: item.name,
-                  price: parseFloat(item.price),
-                  unit: item.unit,
-                  ean: item.ean
-                });
-              }
-            }
+              'Accept': 'application/json',
+              'Referer': 'https://www.foodie.fi/'
+            },
+            timeout: 10000
           }
-          continue;
-        }
+        );
 
-        const data = await response.json();
-
-        if (data.products && Array.isArray(data.products)) {
-          for (const item of data.products) {
+        if (response.data && response.data.results) {
+          for (const item of response.data.results) {
             if (item.name && item.price) {
               products.push({
                 name: item.name,
@@ -131,76 +117,94 @@ const scrapers = {
           }
         }
 
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        console.error(`S-Market search for "${term}" failed:`, err.message);
       }
-
-      console.log(`S-Market: Found ${products.length} products`);
-      return products;
-    } catch (error) {
-      console.error('S-Market scrape failed:', error.message);
-      return products;
     }
-  },
 
-  // Lidl scraper
-  async scrapeLidl() {
-    const products = [];
-
-    try {
-      // Lidl Finland product API
-      const url = 'https://www.lidl.fi/api/products';
-
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        console.log('Lidl API not accessible, trying alternative method');
-        return products;
-      }
-
-      const data = await response.json();
-
-      if (data.products && Array.isArray(data.products)) {
-        for (const item of data.products) {
-          if (item.name && item.price) {
-            products.push({
-              name: item.name,
-              price: parseFloat(item.price),
-              unit: item.unit,
-              ean: item.ean
-            });
-          }
-        }
-      }
-
-      console.log(`Lidl: Found ${products.length} products`);
-      return products;
-    } catch (error) {
-      console.error('Lidl scrape failed:', error.message);
-      return products;
-    }
-  },
-
-  // Alepa (part of SOK, similar to S-Market)
-  async scrapeAlepa() {
-    // Alepa uses same system as S-Market
-    return this.scrapeSMarket();
-  },
-
-  // Prisma (part of SOK, similar to S-Market)
-  async scrapePrisma() {
-    // Prisma uses same system as S-Market
-    return this.scrapeSMarket();
+    console.log(`S-Market: Found ${products.length} products`);
+    return products;
+  } catch (error) {
+    console.error('S-Market scraper failed:', error.message);
+    return products;
   }
-};
+}
 
+// Scraper: Lidl (using puppeteer for JavaScript-heavy site)
+async function scrapeLidl() {
+  const products = [];
+
+  if (!puppeteer || !chromium) {
+    console.log('Lidl: Puppeteer not available, skipping');
+    return products;
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless
+    });
+
+    const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+
+    // Navigate to Lidl product search
+    await page.goto('https://www.lidl.fi/tuotteet', {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    // Search for products
+    for (const term of commonProducts.slice(0, 3)) {
+      try {
+        await page.type('input[type="search"]', term);
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(2000);
+
+        const pageProducts = await page.evaluate(() => {
+          const items = [];
+          document.querySelectorAll('.product-grid-box').forEach(el => {
+            const nameEl = el.querySelector('.product-grid-box__title');
+            const priceEl = el.querySelector('.price');
+
+            if (nameEl && priceEl) {
+              const priceText = priceEl.textContent.replace(/[^0-9,.]/g, '').replace(',', '.');
+              items.push({
+                name: nameEl.textContent.trim(),
+                price: parseFloat(priceText)
+              });
+            }
+          });
+          return items;
+        });
+
+        products.push(...pageProducts);
+
+        // Clear search
+        await page.click('input[type="search"]', { clickCount: 3 });
+        await page.keyboard.press('Backspace');
+        await page.waitForTimeout(1000);
+      } catch (err) {
+        console.error(`Lidl search for "${term}" failed:`, err.message);
+      }
+    }
+
+    console.log(`Lidl: Found ${products.length} products`);
+  } catch (error) {
+    console.error('Lidl scraper failed:', error.message);
+  } finally {
+    if (browser) await browser.close();
+  }
+
+  return products;
+}
+
+// Main handler
 module.exports = async (req, res) => {
-  // Allow both POST and GET for testing
   if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -216,70 +220,74 @@ module.exports = async (req, res) => {
   };
 
   try {
-    // Get all stores from database
-    const storesResult = await sql`SELECT id, name FROM stores`;
-    const stores = storesResult.rows;
+    // Get stores and products from database
+    const [storesResult, productsResult] = await Promise.all([
+      sql`SELECT id, name FROM stores`,
+      sql`SELECT id, name, category FROM products`
+    ]);
 
-    // Get all products to match against
-    const productsResult = await sql`SELECT id, name, category FROM products`;
+    const stores = storesResult.rows;
     const products = productsResult.rows;
 
-    console.log(`Processing ${stores.length} stores and ${products.length} products`);
+    console.log(`Processing ${stores.length} stores, ${products.length} products`);
 
-    // Attempt to scrape each store
+    // Scrape each store
     for (const store of stores) {
-      const storeName = store.name;
-      results.stores[storeName] = { status: 'pending', products: 0, matched: 0 };
+      const storeName = store.name.toLowerCase();
+      results.stores[store.name] = { status: 'pending', products: 0, matched: 0 };
 
       try {
         let scrapedData = [];
 
-        // Try different scrapers based on store name
-        if (storeName.toLowerCase().includes('k-city') || storeName.toLowerCase().includes('k-super')) {
-          scrapedData = await scrapers.scrapeKRuoka();
-        } else if (storeName.toLowerCase().includes('s-market')) {
-          scrapedData = await scrapers.scrapeSMarket();
-        } else if (storeName.toLowerCase().includes('prisma')) {
-          scrapedData = await scrapers.scrapePrisma();
-        } else if (storeName.toLowerCase().includes('lidl')) {
-          scrapedData = await scrapers.scrapeLidl();
-        } else if (storeName.toLowerCase().includes('alepa')) {
-          scrapedData = await scrapers.scrapeAlepa();
+        // Route to appropriate scraper
+        if (storeName.includes('k-city') || storeName.includes('k-super')) {
+          scrapedData = await scrapeKRuoka();
+        } else if (storeName.includes('s-market') || storeName.includes('prisma')) {
+          scrapedData = await scrapeSMarket();
+        } else if (storeName.includes('lidl')) {
+          scrapedData = await scrapeLidl();
+        } else if (storeName.includes('alepa')) {
+          scrapedData = await scrapeSMarket(); // Alepa uses SOK system
         }
 
         if (!scrapedData || scrapedData.length === 0) {
-          results.stores[storeName].status = 'no_data';
+          results.stores[store.name].status = 'no_data';
           continue;
         }
 
         results.summary.total_fetched += scrapedData.length;
 
-        // Match scraped products to our database products
+        // Match and update prices
         let matched = 0;
-        for (const scrapedProduct of scrapedData) {
-          const productMatch = findProductMatch(scrapedProduct.name, products);
+        for (const item of scrapedData) {
+          const productMatch = findProductMatch(item.name, products);
 
-          if (productMatch && scrapedProduct.price > 0) {
-            // Insert or update price
-            await sql`
-              INSERT INTO prices (product_id, store_id, price, recorded_at)
-              VALUES (${productMatch.id}, ${store.id}, ${scrapedProduct.price}, NOW())
-              ON CONFLICT (product_id, store_id)
-              DO UPDATE SET price = ${scrapedProduct.price}, recorded_at = NOW()
-            `;
-            matched++;
-            results.summary.total_updated++;
+          if (productMatch && item.price > 0) {
+            try {
+              await sql`
+                INSERT INTO prices (product_id, store_id, price, recorded_at)
+                VALUES (${productMatch.id}, ${store.id}, ${item.price}, NOW())
+                ON CONFLICT (product_id, store_id)
+                DO UPDATE SET
+                  price = ${item.price},
+                  recorded_at = NOW()
+              `;
+              matched++;
+              results.summary.total_updated++;
+            } catch (dbErr) {
+              console.error(`DB insert failed for ${item.name}:`, dbErr.message);
+            }
           }
         }
 
-        results.stores[storeName].status = 'success';
-        results.stores[storeName].products = scrapedData.length;
-        results.stores[storeName].matched = matched;
+        results.stores[store.name].status = 'success';
+        results.stores[store.name].products = scrapedData.length;
+        results.stores[store.name].matched = matched;
 
       } catch (error) {
-        results.stores[storeName].status = 'error';
-        results.stores[storeName].error = error.message;
-        results.summary.errors.push(`${storeName}: ${error.message}`);
+        results.stores[store.name].status = 'error';
+        results.stores[store.name].error = error.message;
+        results.summary.errors.push(`${store.name}: ${error.message}`);
       }
     }
 
