@@ -79,26 +79,19 @@ a:hover {
     right: 2ch;
     background: var(--bg);
     border: 1px solid var(--border);
-    padding: 0.5ch 2ch;
+    padding: 0.5ch 1ch;
     font-family: inherit;
-    font-size: inherit;
+    font-size: 1.5em;
     color: var(--fg);
     cursor: pointer;
     z-index: 100;
     transition: all 0.2s;
+    line-height: 1;
 }
 
 .theme-toggle:hover {
     background: var(--highlight);
     border-color: var(--accent);
-}
-
-.theme-toggle::before {
-    content: '[ ';
-}
-
-.theme-toggle::after {
-    content: ' ]';
 }
 
 /* ═══ Metadata Table ═══ */

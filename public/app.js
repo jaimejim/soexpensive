@@ -22,8 +22,8 @@ function toggleTheme() {
 }
 
 function updateThemeButton(theme) {
-    const themeText = document.getElementById('themeText');
-    themeText.textContent = theme === 'dark' ? 'light mode' : 'dark mode';
+    const themeIcon = document.getElementById('themeIcon');
+    themeIcon.textContent = theme === 'dark' ? '●' : '◯';
 }
 
 // Initialize app
