@@ -46,25 +46,29 @@
     <section class="chart-section">
         <h2>Store Comparison</h2>
 
-        <figure>
-            <pre id="asciiChart">Loading price comparison...</pre>
-            <figcaption>
-                █ Products where store is cheapest | ░ Total products available at store
-            </figcaption>
-        </figure>
+        <div class="chart-grid">
+            <figure class="chart-figure">
+                <pre id="asciiChart">Loading price comparison...</pre>
+                <figcaption>
+                    █ Products where store is cheapest | ░ Total products available at store
+                </figcaption>
+            </figure>
 
-        <table id="storeTable">
-            <thead>
-                <tr>
-                    <th>Store</th>
-                    <th>Cheapest Count</th>
-                    <th>Avg Price</th>
-                    <th>Rank</th>
-                </tr>
-            </thead>
-            <tbody id="storeComparisonBody">
-            </tbody>
-        </table>
+            <div class="chart-table">
+                <table id="storeTable">
+                    <thead>
+                        <tr>
+                            <th>Store</th>
+                            <th>Cheapest Count</th>
+                            <th>Avg Price</th>
+                            <th>Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storeComparisonBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </section>
 
     <!-- 4. Products Table -->

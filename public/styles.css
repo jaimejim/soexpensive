@@ -238,8 +238,20 @@ hr {
 }
 
 /* ═══ 9. Chart Section ═══ */
-.chart-section figure {
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
     margin: var(--space-3) 0;
+}
+
+.chart-figure {
+    margin: 0;
+}
+
+.chart-table {
+    display: flex;
+    align-items: start;
 }
 
 /* ═══ 10. Responsive ═══ */
@@ -254,6 +266,10 @@ hr {
 
     .header-right {
         order: -1; /* Move stats above on mobile */
+    }
+
+    .chart-grid {
+        grid-template-columns: 1fr;
     }
 
     .filter-grid {
