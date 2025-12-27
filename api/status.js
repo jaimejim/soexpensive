@@ -11,17 +11,15 @@ module.exports = async (req, res) => {
   };
 
   try {
-    // Check if tables exist and get counts
-    const result = await sql`
-      SELECT
-        (SELECT COUNT(*) FROM products) as products,
-        (SELECT COUNT(*) FROM stores) as stores,
-        (SELECT COUNT(*) FROM prices) as prices
-    `;
+    // Check if tables exist and get counts separately
+    const productsResult = await sql`SELECT COUNT(*) as count FROM products`;
+    status.products = parseInt(productsResult.rows[0].count || 0);
 
-    status.products = parseInt(result.rows[0].products || 0);
-    status.stores = parseInt(result.rows[0].stores || 0);
-    status.prices = parseInt(result.rows[0].prices || 0);
+    const storesResult = await sql`SELECT COUNT(*) as count FROM stores`;
+    status.stores = parseInt(storesResult.rows[0].count || 0);
+
+    const pricesResult = await sql`SELECT COUNT(*) as count FROM prices`;
+    status.prices = parseInt(pricesResult.rows[0].count || 0);
 
     // Check database health
     if (status.products === 0 && status.stores === 0) {
