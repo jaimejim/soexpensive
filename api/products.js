@@ -23,21 +23,16 @@ module.exports = async (req, res) => {
       return res.status(200).json([]);
     }
 
-    // Fetch current prices for all products
+    // Fetch current prices for all products (most recent per product-store)
     const pricesResult = await sql`
-      SELECT
+      SELECT DISTINCT ON (pr.product_id, pr.store_id)
         pr.product_id,
         s.name as store_name,
         pr.price,
         pr.recorded_at
       FROM prices pr
       JOIN stores s ON pr.store_id = s.id
-      WHERE pr.recorded_at = (
-        SELECT MAX(recorded_at)
-        FROM prices
-        WHERE product_id = pr.product_id AND store_id = pr.store_id
-      )
-      ORDER BY pr.product_id, s.name
+      ORDER BY pr.product_id, pr.store_id, pr.recorded_at DESC
     `;
 
     // Group prices by product
