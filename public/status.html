@@ -27,8 +27,12 @@
         <p class="status-line status-checking">Frontend: Checking...</p>
         <p class="status-line status-checking">API: Checking...</p>
         <p class="status-line status-checking">Database: Checking...</p>
-        <p class="status-line status-checking">Products: Checking...</p>
+        <p class="status-line status-checking">Data: Checking...</p>
     </div>
+
+    <p style="margin-top: 2rem; color: var(--text-color-alt); font-size: 0.875rem;">
+        Last checked: <span id="lastChecked">-</span> • Auto-refresh: 30s
+    </p>
 
     <script>
         const TIMEOUT = 5000; // 5 seconds
@@ -38,7 +42,7 @@
                 frontend: 'OK',
                 api: 'Checking...',
                 database: 'Checking...',
-                products: 'Checking...'
+                data: 'Checking...'
             };
 
             // Frontend is OK if this page loaded
@@ -56,23 +60,40 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    results.api = data.api === 'ok' ? 'OK' : `ERROR: ${data.api}`;
-                    results.database = data.database === 'ok' ? 'OK' : `ERROR: ${data.database}`;
-                    results.products = data.products ? `OK (${data.products} products)` : 'ERROR: No products found';
+
+                    // API status
+                    results.api = data.api === 'ok' ? 'OK' : data.api;
+
+                    // Database status
+                    if (data.database === 'ok') {
+                        results.database = 'OK';
+                    } else {
+                        results.database = data.database;
+                    }
+
+                    // Data status
+                    if (data.products !== null && data.stores !== null) {
+                        results.data = `${data.products} products, ${data.stores} stores, ${data.prices} prices`;
+                    } else {
+                        results.data = 'No data - ' + data.database;
+                    }
+
+                    // Update last checked time
+                    document.getElementById('lastChecked').textContent = new Date().toLocaleTimeString('fi-FI');
                 } else {
-                    results.api = `ERROR: HTTP ${response.status}`;
-                    results.database = 'ERROR: API failed';
-                    results.products = 'ERROR: API failed';
+                    results.api = `HTTP ${response.status}`;
+                    results.database = 'API failed';
+                    results.data = 'API failed';
                 }
             } catch (error) {
                 if (error.name === 'AbortError') {
-                    results.api = 'ERROR: Timeout after 5s';
-                    results.database = 'ERROR: Timeout';
-                    results.products = 'ERROR: Timeout';
+                    results.api = 'Timeout after 5s';
+                    results.database = 'Timeout';
+                    results.data = 'Timeout';
                 } else {
-                    results.api = `ERROR: ${error.message}`;
-                    results.database = 'ERROR: Cannot connect';
-                    results.products = 'ERROR: Cannot connect';
+                    results.api = error.message;
+                    results.database = 'Cannot connect';
+                    results.data = 'Cannot connect';
                 }
             }
 
@@ -82,7 +103,7 @@
                 <p class="status-line ${results.frontend === 'OK' ? 'status-ok' : 'status-error'}">Frontend: ${results.frontend}</p>
                 <p class="status-line ${results.api === 'OK' ? 'status-ok' : 'status-error'}">API: ${results.api}</p>
                 <p class="status-line ${results.database === 'OK' ? 'status-ok' : 'status-error'}">Database: ${results.database}</p>
-                <p class="status-line ${results.products.startsWith('OK') ? 'status-ok' : 'status-error'}">Products: ${results.products}</p>
+                <p class="status-line ${results.data.includes('products') ? 'status-ok' : 'status-error'}">Data: ${results.data}</p>
             `;
         }
 
