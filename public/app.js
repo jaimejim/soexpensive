@@ -211,18 +211,19 @@ function renderProducts() {
     }).join('');
 }
 
-// Generate ASCII bar chart
+// Generate ASCII bar chart with dual metrics
 function generateASCIIChart(storeStats) {
-    const maxCount = Math.max(...storeStats.map(s => s.cheapestCount));
-    const maxHeight = 15; // More vertical space
-    const barWidth = 4;   // Narrower bars
-    const barSpacing = 10; // Space between bars
+    // Find max for both metrics to scale properly
+    const maxAvailable = Math.max(...storeStats.map(s => s.availableCount));
+    const maxHeight = 15; // Vertical space
+    const barWidth = 1;   // Single character width
+    const barSpacing = 14; // Space between bars
 
     let chart = '';
 
     // Draw bars from top to bottom
     for (let row = maxHeight; row >= 0; row--) {
-        const threshold = (row / maxHeight) * maxCount;
+        const threshold = (row / maxHeight) * maxAvailable;
         let line = '';
 
         // Add Y-axis label every 3 rows
@@ -232,14 +233,18 @@ function generateASCIIChart(storeStats) {
             line += '    │ ';
         }
 
-        // Add bars
+        // Add bars for each store
         storeStats.forEach((store, index) => {
-            const barHeight = (store.cheapestCount / maxCount) * maxHeight;
+            const availableHeight = (store.availableCount / maxAvailable) * maxHeight;
+            const cheapestHeight = (store.cheapestCount / maxAvailable) * maxHeight;
 
-            if (barHeight >= row) {
-                line += '█'.repeat(barWidth);
+            // Draw based on position in the bar
+            if (cheapestHeight >= row) {
+                line += '█'; // Solid for cheapest products
+            } else if (availableHeight >= row) {
+                line += '░'; // Light for available but not cheapest
             } else {
-                line += ' '.repeat(barWidth);
+                line += ' '; // Empty space
             }
 
             if (index < storeStats.length - 1) {
@@ -253,9 +258,7 @@ function generateASCIIChart(storeStats) {
     // Add X-axis with corner and bar bases
     chart += '  0 └';
     storeStats.forEach((store, index) => {
-        chart += '─'.repeat(Math.floor(barWidth / 2));
         chart += '▀';
-        chart += '─'.repeat(Math.floor(barWidth / 2) - 1);
         if (index < storeStats.length - 1) {
             chart += '─'.repeat(barSpacing);
         }
@@ -292,14 +295,14 @@ function updateStoreComparison() {
     // Calculate stats for each store
     const storeStats = STORE_ORDER.map(store => {
         let cheapestCount = 0;
+        let availableCount = 0;
         let totalPrice = 0;
-        let priceCount = 0;
 
         allProducts.forEach(product => {
             const priceData = product.prices[store];
             if (priceData && priceData.price !== null) {
                 totalPrice += priceData.price;
-                priceCount++;
+                availableCount++;
 
                 if (getCheapestStore(product) === store) {
                     cheapestCount++;
@@ -307,13 +310,13 @@ function updateStoreComparison() {
             }
         });
 
-        const avgPrice = priceCount > 0 ? totalPrice / priceCount : 0;
+        const avgPrice = availableCount > 0 ? totalPrice / availableCount : 0;
 
         return {
             name: store,
             cheapestCount,
-            avgPrice,
-            priceCount
+            availableCount,
+            avgPrice
         };
     });
 
