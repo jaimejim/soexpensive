@@ -73,25 +73,28 @@ a:hover {
 }
 
 /* ═══ Theme Toggle ═══ */
+.theme-toggle-container {
+    text-align: right;
+    margin-bottom: 3ch;
+}
+
 .theme-toggle {
-    position: fixed;
-    top: 2ch;
-    right: 2ch;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 0.5ch 1ch;
+    background: transparent;
+    border: none;
     font-family: inherit;
-    font-size: 1.5em;
+    font-size: 1em;
     color: var(--fg);
     cursor: pointer;
-    z-index: 100;
-    transition: all 0.2s;
-    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
 }
 
 .theme-toggle:hover {
-    background: var(--highlight);
-    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.theme-toggle #themeIcon {
+    font-size: 1.2em;
 }
 
 /* ═══ Metadata Table ═══ */

@@ -23,7 +23,7 @@ function toggleTheme() {
 
 function updateThemeButton(theme) {
     const themeIcon = document.getElementById('themeIcon');
-    themeIcon.textContent = theme === 'dark' ? '●' : '◯';
+    themeIcon.textContent = theme === 'dark' ? '☑' : '☐';
 }
 
 // Initialize app
