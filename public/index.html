@@ -14,32 +14,33 @@
         <input type="checkbox" id="themeToggle"> Dark mode
     </label>
 
-    <!-- 1. Title + Value Prop -->
-    <header class="site-header">
-        <h1 class="site-title">It's so expensive</h1>
-        <p class="site-subtitle">Compare grocery prices across Finnish supermarkets. Updated daily.</p>
+    <!-- 1. Two-column header: Title/Meta on left, Stats on right -->
+    <header class="site-header-grid">
+        <div class="header-left">
+            <h1 class="site-title">It's so expensive</h1>
+            <p class="site-subtitle">Compare grocery prices across Finnish supermarkets. Updated daily.</p>
 
-        <div class="meta-strip">
-            <span><strong id="metaProducts">--</strong> products tracked</span>
-            <span>Last updated: <strong id="metaLastUpdate">--</strong></span>
+            <div class="meta-info">
+                <div><strong id="metaProducts">--</strong> products tracked</div>
+                <div>Last updated: <strong id="metaLastUpdate">--</strong></div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="insight-item">
+                <span class="insight-label">Cheapest overall</span>
+                <strong class="insight-value" id="cheapestOverall">--</strong>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Cheapest for most items</span>
+                <strong class="insight-value" id="cheapestCount">--</strong>
+            </div>
+            <div class="insight-item">
+                <span class="insight-label">Avg price gap (worst vs best)</span>
+                <strong class="insight-value" id="priceGap">--</strong>
+            </div>
         </div>
     </header>
-
-    <!-- 2. Key Stats / Summary -->
-    <section class="summary-insight">
-        <div class="insight-item">
-            <span class="insight-label">Cheapest overall</span>
-            <strong class="insight-value" id="cheapestOverall">--</strong>
-        </div>
-        <div class="insight-item">
-            <span class="insight-label">Cheapest for most items</span>
-            <strong class="insight-value" id="cheapestCount">--</strong>
-        </div>
-        <div class="insight-item">
-            <span class="insight-label">Avg price gap (worst vs best)</span>
-            <strong class="insight-value" id="priceGap">--</strong>
-        </div>
-    </section>
 
     <hr>
 
