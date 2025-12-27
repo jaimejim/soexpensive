@@ -176,6 +176,52 @@ hr {
     60%, 100% { content: '...'; }
 }
 
+/* Loading skeleton animation */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--background-color-alt) 0%,
+        var(--background-color) 50%,
+        var(--background-color-alt) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 2px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-row {
+    height: 40px;
+}
+
+.skeleton-text {
+    display: inline-block;
+    height: 1em;
+    width: 100%;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-text.medium {
+    width: 80%;
+}
+
+.skeleton-chart {
+    height: 400px;
+    width: 100%;
+}
+
+.skeleton-table {
+    height: 300px;
+    width: 100%;
+}
+
 .hidden {
     display: none !important;
 }

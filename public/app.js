@@ -63,18 +63,98 @@ async function init() {
     }
 }
 
-// Fetch stores
+// Fetch stores with caching
 async function fetchStores() {
+    // Try to load from cache first
+    if (isCacheValid()) {
+        const cachedStores = localStorage.getItem(CACHE_KEY_STORES);
+        if (cachedStores) {
+            allStores = JSON.parse(cachedStores);
+            return;
+        }
+    }
+
     const response = await fetch('/api/stores');
     allStores = await response.json();
+
+    // Cache the stores
+    try {
+        localStorage.setItem(CACHE_KEY_STORES, JSON.stringify(allStores));
+    } catch (e) {
+        console.warn('Failed to cache stores:', e);
+    }
 }
 
-// Fetch products
+// Cache configuration
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY_PRODUCTS = 'soexpensive_products';
+const CACHE_KEY_STORES = 'soexpensive_stores';
+const CACHE_KEY_TIMESTAMP = 'soexpensive_timestamp';
+
+// Check if cache is valid
+function isCacheValid() {
+    const timestamp = localStorage.getItem(CACHE_KEY_TIMESTAMP);
+    if (!timestamp) return false;
+
+    const age = Date.now() - parseInt(timestamp);
+    return age < CACHE_TTL;
+}
+
+// Pre-process products: calculate cheapest store and min/max prices
+function preprocessProducts(products) {
+    products.forEach(product => {
+        let minPrice = Infinity;
+        let maxPrice = 0;
+        let cheapestStore = null;
+
+        Object.entries(product.prices).forEach(([store, data]) => {
+            if (data && data.price !== null) {
+                if (data.price < minPrice) {
+                    minPrice = data.price;
+                    cheapestStore = store;
+                }
+                if (data.price > maxPrice) {
+                    maxPrice = data.price;
+                }
+            }
+        });
+
+        // Store pre-calculated values
+        product._cheapestStore = cheapestStore;
+        product._minPrice = minPrice === Infinity ? null : minPrice;
+        product._maxPrice = maxPrice === 0 ? null : maxPrice;
+    });
+
+    return products;
+}
+
+// Fetch products with caching
 async function fetchProducts() {
     document.getElementById('loading').classList.remove('hidden');
 
+    // Try to load from cache first
+    if (isCacheValid()) {
+        const cachedProducts = localStorage.getItem(CACHE_KEY_PRODUCTS);
+        if (cachedProducts) {
+            allProducts = JSON.parse(cachedProducts);
+            document.getElementById('loading').classList.add('hidden');
+            return;
+        }
+    }
+
     const response = await fetch('/api/products');
-    allProducts = await response.json();
+    const rawProducts = await response.json();
+
+    // Pre-process products to calculate expensive values once
+    allProducts = preprocessProducts(rawProducts);
+
+    // Cache the processed products
+    try {
+        localStorage.setItem(CACHE_KEY_PRODUCTS, JSON.stringify(allProducts));
+        localStorage.setItem(CACHE_KEY_TIMESTAMP, Date.now().toString());
+    } catch (e) {
+        console.warn('Failed to cache products:', e);
+    }
 
     document.getElementById('loading').classList.add('hidden');
 }
@@ -117,31 +197,19 @@ function getFilteredProducts() {
     return filtered;
 }
 
-// Get minimum price for a product
+// Get minimum price for a product (uses pre-calculated value)
 function getMinPrice(product) {
-    const prices = Object.values(product.prices).map(p => p.price).filter(p => p !== null);
-    return prices.length > 0 ? Math.min(...prices) : Infinity;
+    return product._minPrice !== undefined ? product._minPrice : Infinity;
 }
 
-// Get maximum price for a product
+// Get maximum price for a product (uses pre-calculated value)
 function getMaxPrice(product) {
-    const prices = Object.values(product.prices).map(p => p.price).filter(p => p !== null);
-    return prices.length > 0 ? Math.max(...prices) : 0;
+    return product._maxPrice !== undefined ? product._maxPrice : 0;
 }
 
-// Get cheapest store for a product
+// Get cheapest store for a product (uses pre-calculated value)
 function getCheapestStore(product) {
-    let minPrice = Infinity;
-    let cheapestStore = null;
-
-    Object.entries(product.prices).forEach(([store, data]) => {
-        if (data.price < minPrice) {
-            minPrice = data.price;
-            cheapestStore = store;
-        }
-    });
-
-    return cheapestStore;
+    return product._cheapestStore !== undefined ? product._cheapestStore : null;
 }
 
 // Render products table
@@ -296,7 +364,15 @@ function updateStoreComparison() {
 
     // Generate and display ASCII chart
     const chart = generateASCIIChart(storeStats);
-    document.getElementById('asciiChart').textContent = chart;
+    const chartElement = document.getElementById('asciiChart');
+    chartElement.textContent = chart;
+    chartElement.classList.remove('hidden');
+
+    // Hide chart skeleton
+    const chartSkeleton = document.getElementById('chartSkeleton');
+    if (chartSkeleton) {
+        chartSkeleton.classList.add('hidden');
+    }
 
     // Render table
     tbody.innerHTML = storeStats.map((store, index) => {
