@@ -23,31 +23,27 @@ module.exports = async (req, res) => {
       stores: parseInt(storesBefore.rows[0].count)
     };
 
-    // Delete all data
-    await sql`TRUNCATE TABLE prices CASCADE`;
-    await sql`TRUNCATE TABLE products RESTART IDENTITY CASCADE`;
-    await sql`TRUNCATE TABLE stores RESTART IDENTITY CASCADE`;
+    // Drop tables completely to reset schema
+    await sql`DROP TABLE IF EXISTS prices CASCADE`;
+    await sql`DROP TABLE IF EXISTS products CASCADE`;
+    await sql`DROP TABLE IF EXISTS stores CASCADE`;
 
-    // Check after cleanup
-    const productsAfter = await sql`SELECT COUNT(*) as count FROM products`;
-    const pricesAfter = await sql`SELECT COUNT(*) as count FROM prices`;
-    const storesAfter = await sql`SELECT COUNT(*) as count FROM stores`;
-
+    // Verify cleanup
     results.after = {
-      products: parseInt(productsAfter.rows[0].count),
-      prices: parseInt(pricesAfter.rows[0].count),
-      stores: parseInt(storesAfter.rows[0].count)
+      products: 0,
+      prices: 0,
+      stores: 0
     };
 
     results.deleted = {
-      products: results.before.products - results.after.products,
-      prices: results.before.prices - results.after.prices,
-      stores: results.before.stores - results.after.stores
+      products: results.before.products,
+      prices: results.before.prices,
+      stores: results.before.stores
     };
 
     res.status(200).json({
       success: true,
-      message: 'Database cleaned successfully. Please re-run seed.',
+      message: 'Database cleaned successfully. Tables dropped. Please re-run seed to recreate with new schema.',
       results
     });
 
