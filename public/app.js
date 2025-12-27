@@ -256,7 +256,7 @@ function generateASCIIChart(storeStats) {
     }
 
     // Add X-axis with corner and bar bases
-    chart += '  0 └';
+    chart += '    └';
     storeStats.forEach((store, index) => {
         chart += '▀';
         if (index < storeStats.length - 1) {
@@ -266,7 +266,7 @@ function generateASCIIChart(storeStats) {
     chart += '\n';
 
     // Add labels centered below each bar
-    const firstBarOffset = 6; // Account for "  0 └─"
+    const firstBarOffset = 5; // Account for "    └"
     chart += ' '.repeat(firstBarOffset);
 
     storeStats.forEach((store, index) => {
