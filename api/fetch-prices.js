@@ -36,12 +36,14 @@ function findProductMatch(scrapedName, dbProducts) {
 }
 
 // Scraper: K-Ruoka (Kesko stores: K-City, K-Super)
-async function scrapeKRuoka() {
+async function scrapeKRuoka(errors = []) {
   const products = [];
+  const debugInfo = { searched: [], found: 0, errors: [] };
 
   try {
     // Try K-Ruoka API
     for (const term of commonProducts.slice(0, 5)) {
+      debugInfo.searched.push(term);
       try {
         const response = await axios.get(
           `https://www.k-ruoka.fi/kr-api/product/search`,
@@ -67,29 +69,40 @@ async function scrapeKRuoka() {
               });
             }
           }
+          debugInfo.found += response.data.results.length;
+        } else {
+          debugInfo.errors.push(`${term}: No results in response`);
         }
 
         await new Promise(r => setTimeout(r, 500));
       } catch (err) {
-        console.error(`K-Ruoka search for "${term}" failed:`, err.message);
+        const errMsg = `K-Ruoka search for "${term}" failed: ${err.message}`;
+        console.error(errMsg);
+        debugInfo.errors.push(errMsg);
+        errors.push(errMsg);
       }
     }
 
+    errors.push(`K-Ruoka: searched ${debugInfo.searched.join(', ')} → found ${products.length} products`);
     console.log(`K-Ruoka: Found ${products.length} products`);
     return products;
   } catch (error) {
-    console.error('K-Ruoka scraper failed:', error.message);
+    const errMsg = `K-Ruoka scraper failed: ${error.message}`;
+    console.error(errMsg);
+    errors.push(errMsg);
     return products;
   }
 }
 
 // Scraper: S-Market/Prisma (SOK Group)
-async function scrapeSMarket() {
+async function scrapeSMarket(errors = []) {
   const products = [];
+  const debugInfo = { searched: [], found: 0, errors: [] };
 
   try {
     // Try foodie.fm API (used by S-Kaupat)
     for (const term of commonProducts.slice(0, 5)) {
+      debugInfo.searched.push(term);
       try {
         const response = await axios.get(
           `https://www.foodie.fi/api/v1/products/search`,
@@ -115,28 +128,39 @@ async function scrapeSMarket() {
               });
             }
           }
+          debugInfo.found += response.data.results.length;
+        } else {
+          debugInfo.errors.push(`${term}: No results in response`);
         }
 
         await new Promise(r => setTimeout(r, 500));
       } catch (err) {
-        console.error(`S-Market search for "${term}" failed:`, err.message);
+        const errMsg = `S-Market search for "${term}" failed: ${err.message}`;
+        console.error(errMsg);
+        debugInfo.errors.push(errMsg);
+        errors.push(errMsg);
       }
     }
 
+    errors.push(`S-Market: searched ${debugInfo.searched.join(', ')} → found ${products.length} products`);
     console.log(`S-Market: Found ${products.length} products`);
     return products;
   } catch (error) {
-    console.error('S-Market scraper failed:', error.message);
+    const errMsg = `S-Market scraper failed: ${error.message}`;
+    console.error(errMsg);
+    errors.push(errMsg);
     return products;
   }
 }
 
 // Scraper: Lidl (using puppeteer for JavaScript-heavy site)
-async function scrapeLidl() {
+async function scrapeLidl(errors = []) {
   const products = [];
 
   if (!puppeteer || !chromium) {
-    console.log('Lidl: Puppeteer not available, skipping');
+    const errMsg = 'Lidl: Puppeteer not available, skipping';
+    console.log(errMsg);
+    errors.push(errMsg);
     return products;
   }
 
@@ -250,13 +274,17 @@ module.exports = async (req, res) => {
 
         // Route to appropriate scraper
         if (storeName.includes('k-city') || storeName.includes('k-super')) {
-          scrapedData = await scrapeKRuoka();
+          results.summary.errors.push(`Scraping ${store.name} with K-Ruoka API...`);
+          scrapedData = await scrapeKRuoka(results.summary.errors);
         } else if (storeName.includes('s-market') || storeName.includes('prisma')) {
-          scrapedData = await scrapeSMarket();
+          results.summary.errors.push(`Scraping ${store.name} with S-Market API...`);
+          scrapedData = await scrapeSMarket(results.summary.errors);
         } else if (storeName.includes('lidl')) {
-          scrapedData = await scrapeLidl();
+          results.summary.errors.push(`Scraping ${store.name} with Lidl (Puppeteer)...`);
+          scrapedData = await scrapeLidl(results.summary.errors);
         } else if (storeName.includes('alepa')) {
-          scrapedData = await scrapeSMarket(); // Alepa uses SOK system
+          results.summary.errors.push(`Scraping ${store.name} with S-Market API...`);
+          scrapedData = await scrapeSMarket(results.summary.errors); // Alepa uses SOK system
         }
 
         if (!scrapedData || scrapedData.length === 0) {
