@@ -15,7 +15,25 @@ const { sql } = require('@vercel/postgres');
 function normalizeProductName(name) {
   return name
     .toLowerCase()
+    // Remove common brand names
+    .replace(/\bpirkka\b/g, '')
+    .replace(/\bk-menu\b/g, '')
+    .replace(/\brainbow\b/g, '')
+    .replace(/\bvalio\b/g, '')
+    // Remove origin markers
+    .replace(/\bsuomi\b/g, '')
+    .replace(/\bulkomainen\b/g, '')
+    .replace(/\bespanja\b/g, '')
+    .replace(/\bitalia\b/g, '')
+    // Remove qualifiers
+    .replace(/\bluomu\b/g, '')
+    .replace(/\bparhaat\b/g, '')
+    .replace(/\bsuomalainen\b/g, '')
+    .replace(/\btuore\b/g, '')
+    // Keep Finnish characters, remove everything else
     .replace(/[^\wåäö\s]/g, '')
+    // Collapse multiple spaces
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -23,21 +41,26 @@ function normalizeProductName(name) {
 function findProductMatch(scrapedName, dbProducts) {
   const normalized = normalizeProductName(scrapedName);
 
+  // Split into words for flexible matching
+  const words = normalized.split(' ').filter(w => w.length > 2); // ignore short words
+
+  if (words.length === 0) return null;
+
   // Try exact match first
   let match = dbProducts.find(p => normalizeProductName(p.name) === normalized);
   if (match) return match;
 
-  // Try partial match (scraped name contains db name)
+  // Try matching with main words (most flexible)
   match = dbProducts.find(p => {
     const dbNorm = normalizeProductName(p.name);
-    return normalized.includes(dbNorm);
-  });
-  if (match) return match;
+    const dbWords = dbNorm.split(' ').filter(w => w.length > 2);
 
-  // Try reverse partial match (db name contains scraped name)
-  match = dbProducts.find(p => {
-    const dbNorm = normalizeProductName(p.name);
-    return dbNorm.includes(normalized);
+    // Check if all database words are in scraped name
+    return dbWords.every(dbWord =>
+      words.some(scrapedWord =>
+        scrapedWord.includes(dbWord) || dbWord.includes(scrapedWord)
+      )
+    );
   });
 
   return match;
