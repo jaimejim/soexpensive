@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
       SELECT DISTINCT ON (pr.product_id, pr.store_id)
         pr.product_id,
         s.name as store_name,
-        pr.price,
+        pr.price_cents,
         pr.recorded_at
       FROM prices pr
       JOIN stores s ON pr.store_id = s.id
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
         pricesByProduct[row.product_id] = {};
       }
       pricesByProduct[row.product_id][row.store_name] = {
-        price: parseFloat(row.price),
+        price: row.price_cents / 100, // Convert cents to euros for display
         recorded_at: row.recorded_at
       };
     });

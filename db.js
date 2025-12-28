@@ -30,8 +30,9 @@ async function initDatabase() {
         id SERIAL PRIMARY KEY,
         product_id INTEGER NOT NULL REFERENCES products(id),
         store_id INTEGER NOT NULL REFERENCES stores(id),
-        price DECIMAL(10,2) NOT NULL,
-        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        price_cents INTEGER NOT NULL,
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(product_id, store_id)
       )
     `;
 
@@ -63,12 +64,12 @@ async function getProductsWithPrices() {
       p.category,
       p.unit,
       s.name as store_name,
-      pr.price,
+      pr.price_cents,
       pr.recorded_at
     FROM products p
     CROSS JOIN stores s
     LEFT JOIN LATERAL (
-      SELECT product_id, store_id, price, recorded_at
+      SELECT product_id, store_id, price_cents, recorded_at
       FROM prices
       WHERE product_id = p.id AND store_id = s.id
       ORDER BY recorded_at DESC
@@ -85,7 +86,7 @@ async function getPriceHistory(productId) {
   const result = await sql`
     SELECT
       s.name as store_name,
-      pr.price,
+      pr.price_cents,
       pr.recorded_at
     FROM prices pr
     JOIN stores s ON pr.store_id = s.id
@@ -96,11 +97,13 @@ async function getPriceHistory(productId) {
   return result.rows;
 }
 
-// Add a new price entry
-async function addPrice(productId, storeId, price) {
+// Add a new price entry (price in cents)
+async function addPrice(productId, storeId, priceCents) {
   const result = await sql`
-    INSERT INTO prices (product_id, store_id, price)
-    VALUES (${productId}, ${storeId}, ${price})
+    INSERT INTO prices (product_id, store_id, price_cents)
+    VALUES (${productId}, ${storeId}, ${priceCents})
+    ON CONFLICT (product_id, store_id)
+    DO UPDATE SET price_cents = ${priceCents}, recorded_at = CURRENT_TIMESTAMP
     RETURNING id
   `;
 
