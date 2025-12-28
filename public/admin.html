@@ -45,7 +45,7 @@
 <body>
     <h1>Database Admin</h1>
     <div style="margin-bottom: 1.5rem; padding: 0.5rem; border: 1px solid var(--text-color-alt); font-size: 0.85rem; color: var(--text-color-alt); font-family: 'JetBrains Mono', monospace;">
-        <div>Version: <span id="commitHash">d10ac4f</span> | Branch: claude/price-comparison-app-km6Wj</div>
+        <div>Version: <span id="commitHash">74433f7</span> | Branch: claude/price-comparison-app-km6Wj</div>
         <div style="margin: 0.25rem 0;"><a href="/" style="color: var(--text-color); text-decoration: none;">→ Main Site</a>      <a href="https://github.com/jaimejim/soexpensive" target="_blank" style="color: var(--text-color); text-decoration: none;">→ GitHub</a></div>
         <div id="deployInfo">Deployed 0m ago</div>
     </div>
@@ -65,9 +65,8 @@
 
     <div class="section">
         <h2>3. Price Management</h2>
-        <p>Fetch or import prices</p>
-        <button onclick="fetchPrices()">Fetch from Stores</button>
-        <button onclick="importSamplePrices()">Import Sample Prices</button>
+        <p>Update prices (uses sample data - real store APIs block scrapers)</p>
+        <button onclick="fetchPrices()">Update Prices</button>
     </div>
 
     <div class="section">
@@ -200,8 +199,7 @@
         }
 
         async function fetchPrices() {
-            output.textContent = 'Fetching prices from stores...\n';
-            log('This may take 1-5 minutes...\n');
+            output.textContent = 'Updating prices with sample data...\n';
 
             try {
                 const response = await fetch('/api/fetch-prices', {
