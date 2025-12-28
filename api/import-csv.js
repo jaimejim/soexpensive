@@ -50,16 +50,15 @@ function findProductMatch(scrapedName, dbProducts) {
   let match = dbProducts.find(p => normalizeProductName(p.name) === normalized);
   if (match) return match;
 
-  // Try matching with main words (most flexible)
+  // Try matching with main words (exact word matches only)
   match = dbProducts.find(p => {
     const dbNorm = normalizeProductName(p.name);
     const dbWords = dbNorm.split(' ').filter(w => w.length > 2);
 
-    // Check if all database words are in scraped name
+    // Check if all database words exactly match scraped words
+    // This prevents "omena" from matching "omenamehu"
     return dbWords.every(dbWord =>
-      words.some(scrapedWord =>
-        scrapedWord.includes(dbWord) || dbWord.includes(scrapedWord)
-      )
+      words.some(scrapedWord => scrapedWord === dbWord)
     );
   });
 
