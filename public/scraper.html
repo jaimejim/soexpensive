@@ -41,10 +41,21 @@
     <h1>Price Scraper Control Panel</h1>
 
     <section>
-        <h2>Actions</h2>
-        <button id="fetchBtn" class="button">🔄 Fetch Prices from Stores</button>
+        <h2>Database</h2>
+        <button id="seedBtn" class="button">🌱 Seed Database</button>
+        <button id="cleanBtn" class="button">🧹 Clean Database</button>
+    </section>
+
+    <section>
+        <h2>Prices</h2>
+        <button id="fetchBtn" class="button">🔄 Fetch from Stores</button>
         <button id="importBtn" class="button">📥 Import Sample Prices</button>
+    </section>
+
+    <section>
+        <h2>Status</h2>
         <button id="statusBtn" class="button">📊 Check API Status</button>
+        <button id="healthBtn" class="button">❤️  Health Check</button>
     </section>
 
     <section id="status"></section>
@@ -53,9 +64,12 @@
     <script>
         const resultsEl = document.getElementById('results');
         const statusEl = document.getElementById('status');
+        const seedBtn = document.getElementById('seedBtn');
+        const cleanBtn = document.getElementById('cleanBtn');
         const fetchBtn = document.getElementById('fetchBtn');
         const importBtn = document.getElementById('importBtn');
         const statusBtn = document.getElementById('statusBtn');
+        const healthBtn = document.getElementById('healthBtn');
 
         function showStatus(message, type = 'info') {
             statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
@@ -147,6 +161,78 @@
             }
         }
 
+        async function seedDatabase() {
+            seedBtn.disabled = true;
+            seedBtn.textContent = '⏳ Seeding...';
+            showStatus('Seeding database with products and stores...', 'info');
+            resultsEl.textContent = 'Please wait...';
+
+            try {
+                const response = await fetch('/api/seed');
+                const data = await response.json();
+
+                if (response.ok) {
+                    const r = data.results || {};
+                    showStatus(
+                        `✅ Database seeded!\n` +
+                        `Stores: ${r.stores || 0}\n` +
+                        `Products: ${r.products || 0}\n` +
+                        `Prices: ${r.currentPrices || 0}`,
+                        'success'
+                    );
+                } else {
+                    showStatus(`❌ Seeding failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+
+                showResults(data);
+            } catch (error) {
+                showStatus(`❌ Request failed: ${error.message}`, 'error');
+                resultsEl.textContent = error.stack;
+            } finally {
+                seedBtn.disabled = false;
+                seedBtn.textContent = '🌱 Seed Database';
+            }
+        }
+
+        async function cleanDatabase() {
+            if (!confirm('⚠️  This will DELETE all data! Continue?')) return;
+
+            cleanBtn.disabled = true;
+            cleanBtn.textContent = '⏳ Cleaning...';
+            showStatus('Dropping all tables...', 'info');
+            resultsEl.textContent = 'Please wait...';
+
+            try {
+                const response = await fetch('/api/cleanup', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const d = data.results?.deleted || {};
+                    showStatus(
+                        `✅ Database cleaned!\n` +
+                        `Deleted ${d.products || 0} products\n` +
+                        `Deleted ${d.prices || 0} prices\n` +
+                        `Deleted ${d.stores || 0} stores`,
+                        'success'
+                    );
+                } else {
+                    showStatus(`❌ Cleanup failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+
+                showResults(data);
+            } catch (error) {
+                showStatus(`❌ Request failed: ${error.message}`, 'error');
+                resultsEl.textContent = error.stack;
+            } finally {
+                cleanBtn.disabled = false;
+                cleanBtn.textContent = '🧹 Clean Database';
+            }
+        }
+
         async function checkStatus() {
             statusBtn.disabled = true;
             showStatus('Checking API status...', 'info');
@@ -179,9 +265,38 @@
             }
         }
 
+        async function checkHealth() {
+            healthBtn.disabled = true;
+            healthBtn.textContent = '⏳ Checking...';
+            showStatus('Checking health...', 'info');
+            resultsEl.textContent = 'Please wait...';
+
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus(`✅ ${data.message || 'API is healthy!'}`, 'success');
+                } else {
+                    showStatus(`❌ Health check failed`, 'error');
+                }
+
+                showResults(data);
+            } catch (error) {
+                showStatus(`❌ Request failed: ${error.message}`, 'error');
+                resultsEl.textContent = error.stack;
+            } finally {
+                healthBtn.disabled = false;
+                healthBtn.textContent = '❤️  Health Check';
+            }
+        }
+
+        seedBtn.addEventListener('click', seedDatabase);
+        cleanBtn.addEventListener('click', cleanDatabase);
         fetchBtn.addEventListener('click', fetchPrices);
         importBtn.addEventListener('click', importSamplePrices);
         statusBtn.addEventListener('click', checkStatus);
+        healthBtn.addEventListener('click', checkHealth);
 
         // Initial status check
         checkStatus();
