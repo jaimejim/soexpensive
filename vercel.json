@@ -25,5 +25,10 @@
       "memory": 3008,
       "maxDuration": 300
     }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "claude/price-comparison-app-km6Wj": true
+    }
   }
 }
