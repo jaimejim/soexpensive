@@ -320,6 +320,45 @@ figcaption {
     min-height: 500px;
 }
 
+/* ═══ Data Freshness Indicators ═══ */
+
+.data-legend {
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    color: var(--text-color-alt);
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.legend-item sup {
+    font-size: 0.75rem;
+}
+
+/* Price freshness indicators */
+sup.verified-indicator {
+    color: #2a9d8f;
+    font-size: 0.7rem;
+    margin-left: 0.1rem;
+    opacity: 0.8;
+}
+
+sup.estimate-indicator {
+    color: var(--text-color-alt);
+    font-size: 0.7rem;
+    margin-left: 0.1rem;
+    opacity: 0.6;
+}
+
 /* ═══ 10. Responsive ═══ */
 @media (max-width: 768px) {
     body {

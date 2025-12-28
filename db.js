@@ -31,10 +31,21 @@ async function initDatabase() {
         product_id INTEGER NOT NULL REFERENCES products(id),
         store_id INTEGER NOT NULL REFERENCES stores(id),
         price_cents INTEGER NOT NULL,
-        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(product_id, store_id)
+        recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+
+    // Drop UNIQUE constraint if it exists (migration for price history)
+    try {
+      await sql`
+        ALTER TABLE prices
+        DROP CONSTRAINT IF EXISTS prices_product_id_store_id_key
+      `;
+      console.log('Price history enabled: UNIQUE constraint removed');
+    } catch (error) {
+      // Constraint might not exist, that's okay
+      console.log('UNIQUE constraint check:', error.message);
+    }
 
     // Create index for faster queries
     await sql`
@@ -98,12 +109,11 @@ async function getPriceHistory(productId) {
 }
 
 // Add a new price entry (price in cents)
+// NOTE: No longer uses UPSERT - inserts new record each time for price history
 async function addPrice(productId, storeId, priceCents) {
   const result = await sql`
-    INSERT INTO prices (product_id, store_id, price_cents)
-    VALUES (${productId}, ${storeId}, ${priceCents})
-    ON CONFLICT (product_id, store_id)
-    DO UPDATE SET price_cents = ${priceCents}, recorded_at = CURRENT_TIMESTAMP
+    INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+    VALUES (${productId}, ${storeId}, ${priceCents}, CURRENT_TIMESTAMP)
     RETURNING id
   `;
 
