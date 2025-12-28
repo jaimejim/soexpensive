@@ -22,8 +22,8 @@
   ],
   "functions": {
     "api/fetch-prices.js": {
-      "memory": 3008,
-      "maxDuration": 300
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "git": {
