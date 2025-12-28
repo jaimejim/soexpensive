@@ -210,14 +210,53 @@
                     log('=== FETCH COMPLETE ===\n');
                     log(`Fetched: ${data.summary.total_fetched || 0} products`);
                     log(`Updated: ${data.summary.total_updated || 0} prices`);
-                    log(`Errors: ${data.summary.errors?.length || 0}`);
+                    log(`Errors: ${data.summary.errors?.length || 0}\n`);
+
+                    // Show debug info
+                    if (data.debug) {
+                        log('=== DEBUG INFO ===');
+                        log(`DB Products: ${data.debug.db_products}`);
+                        log(`DB Stores: ${data.debug.db_stores}\n`);
+
+                        // Show store results
+                        if (data.stores) {
+                            log('Store Results:');
+                            Object.entries(data.stores).forEach(([name, info]) => {
+                                log(`  ${name}: ${info.status} - ${info.products || 0} scraped, ${info.matched || 0} matched`);
+                            });
+                            log('');
+                        }
+
+                        // Show scraped samples
+                        if (data.debug.scraped_samples && Object.keys(data.debug.scraped_samples).length > 0) {
+                            log('Scraped Samples (first 3 per store):');
+                            Object.entries(data.debug.scraped_samples).forEach(([store, items]) => {
+                                log(`  ${store}:`);
+                                items.forEach(item => log(`    - ${item.name}: €${item.price}`));
+                            });
+                            log('');
+                        }
+
+                        // Show match samples
+                        if (data.debug.match_samples && data.debug.match_samples.length > 0) {
+                            log('Match Samples (first 5):');
+                            data.debug.match_samples.forEach(m => {
+                                log(`  ${m.store}: "${m.scraped_name}" → "${m.matched_to}" (€${m.price_euros} = ${m.price_cents}¢)`);
+                            });
+                            log('');
+                        }
+                    }
 
                     if (data.summary.errors && data.summary.errors.length > 0) {
-                        log('\nErrors:');
+                        log('Errors:');
                         data.summary.errors.forEach(err => log(`  - ${err}`));
                     }
                 } else {
                     log('ERROR: ' + (data.error || 'Unknown error'));
+                    if (data.results) {
+                        log('\nPartial results:');
+                        log(JSON.stringify(data.results, null, 2));
+                    }
                 }
 
             } catch (error) {

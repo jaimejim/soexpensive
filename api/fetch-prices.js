@@ -216,6 +216,12 @@ module.exports = async (req, res) => {
       total_fetched: 0,
       total_updated: 0,
       errors: []
+    },
+    debug: {
+      db_products: 0,
+      db_stores: 0,
+      scraped_samples: {},
+      match_samples: []
     }
   };
 
@@ -228,6 +234,9 @@ module.exports = async (req, res) => {
 
     const stores = storesResult.rows;
     const products = productsResult.rows;
+
+    results.debug.db_products = products.length;
+    results.debug.db_stores = stores.length;
 
     console.log(`Processing ${stores.length} stores, ${products.length} products`);
 
@@ -257,6 +266,12 @@ module.exports = async (req, res) => {
 
         results.summary.total_fetched += scrapedData.length;
 
+        // Store samples for debugging (first 3 items)
+        results.debug.scraped_samples[store.name] = scrapedData.slice(0, 3).map(item => ({
+          name: item.name,
+          price: item.price
+        }));
+
         // Match and update prices
         let matched = 0;
         for (const item of scrapedData) {
@@ -264,18 +279,34 @@ module.exports = async (req, res) => {
 
           if (productMatch && item.price > 0) {
             try {
+              // Convert euros to cents (INTEGER)
+              const priceCents = Math.round(item.price * 100);
+
               await sql`
-                INSERT INTO prices (product_id, store_id, price, recorded_at)
-                VALUES (${productMatch.id}, ${store.id}, ${item.price}, NOW())
+                INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+                VALUES (${productMatch.id}, ${store.id}, ${priceCents}, NOW())
                 ON CONFLICT (product_id, store_id)
                 DO UPDATE SET
-                  price = ${item.price},
+                  price_cents = ${priceCents},
                   recorded_at = NOW()
               `;
               matched++;
               results.summary.total_updated++;
+
+              // Store first 5 matches for debugging
+              if (results.debug.match_samples.length < 5) {
+                results.debug.match_samples.push({
+                  store: store.name,
+                  scraped_name: item.name,
+                  matched_to: productMatch.name,
+                  price_euros: item.price,
+                  price_cents: priceCents
+                });
+              }
             } catch (dbErr) {
-              console.error(`DB insert failed for ${item.name}:`, dbErr.message);
+              const errMsg = `DB insert failed for ${item.name}: ${dbErr.message}`;
+              console.error(errMsg);
+              results.summary.errors.push(errMsg);
             }
           }
         }
