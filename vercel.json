@@ -1,20 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/api"
-    },
-    {
       "source": "/scraper",
       "destination": "/scraper.html"
     },
     {
-      "source": "/status",
-      "destination": "/api/status"
-    },
-    {
       "source": "/admin",
-      "destination": "/scraper.html"
+      "destination": "/admin.html"
     }
   ],
   "headers": [
@@ -33,11 +25,5 @@
       "memory": 3008,
       "maxDuration": 300
     }
-  },
-  "crons": [
-    {
-      "path": "/api/fetch-prices",
-      "schedule": "0 2 * * *"
-    }
-  ]
+  }
 }
