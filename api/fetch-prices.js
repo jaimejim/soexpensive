@@ -1,22 +1,28 @@
 const { sql } = require('@vercel/postgres');
 
 // Sample price data (since store APIs block scraper requests)
+// Using Finnish product names to match database
 const SAMPLE_PRICES = {
-  "Milk": { "Lidl": 0.99, "S-Market": 1.15, "Prisma": 1.09, "K-Citymarket": 1.19, "K-Supermarket": 1.22, "Alepa": 1.25 },
-  "Bread": { "Lidl": 0.79, "S-Market": 1.29, "Prisma": 1.19, "K-Citymarket": 1.35, "K-Supermarket": 1.39, "Alepa": 1.45 },
-  "Cheese": { "Lidl": 2.99, "S-Market": 3.49, "Prisma": 3.29, "K-Citymarket": 3.59, "K-Supermarket": 3.69, "Alepa": 3.79 },
-  "Eggs": { "Lidl": 2.49, "S-Market": 2.89, "Prisma": 2.79, "K-Citymarket": 2.95, "K-Supermarket": 2.99, "Alepa": 3.09 },
-  "Tomato": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
-  "Banana": { "Lidl": 1.49, "S-Market": 1.79, "Prisma": 1.69, "K-Citymarket": 1.89, "K-Supermarket": 1.95, "Alepa": 1.99 },
-  "Coffee": { "Lidl": 4.99, "S-Market": 5.99, "Prisma": 5.49, "K-Citymarket": 6.29, "K-Supermarket": 6.49, "Alepa": 6.79 },
-  "Rice": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
+  "Maito": { "Lidl": 0.99, "S-Market": 1.15, "Prisma": 1.09, "K-Citymarket": 1.19, "K-Supermarket": 1.22, "Alepa": 1.25 },
+  "Leipä": { "Lidl": 0.79, "S-Market": 1.29, "Prisma": 1.19, "K-Citymarket": 1.35, "K-Supermarket": 1.39, "Alepa": 1.45 },
+  "Ruisleipä": { "Lidl": 2.29, "S-Market": 2.59, "Prisma": 2.49, "K-Citymarket": 2.69, "K-Supermarket": 2.75, "Alepa": 2.89 },
+  "Juusto": { "Lidl": 2.99, "S-Market": 3.49, "Prisma": 3.29, "K-Citymarket": 3.59, "K-Supermarket": 3.69, "Alepa": 3.79 },
+  "Kananmunat": { "Lidl": 2.49, "S-Market": 2.89, "Prisma": 2.79, "K-Citymarket": 2.95, "K-Supermarket": 2.99, "Alepa": 3.09 },
+  "Tomaatti": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
+  "Banaani": { "Lidl": 1.49, "S-Market": 1.79, "Prisma": 1.69, "K-Citymarket": 1.89, "K-Supermarket": 1.95, "Alepa": 1.99 },
+  "Kahvi": { "Lidl": 4.99, "S-Market": 5.99, "Prisma": 5.49, "K-Citymarket": 6.29, "K-Supermarket": 6.49, "Alepa": 6.79 },
+  "Riisi": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
   "Pasta": { "Lidl": 0.89, "S-Market": 1.29, "Prisma": 1.09, "K-Citymarket": 1.39, "K-Supermarket": 1.45, "Alepa": 1.49 },
-  "Yogurt": { "Lidl": 0.79, "S-Market": 1.19, "Prisma": 0.99, "K-Citymarket": 1.29, "K-Supermarket": 1.35, "Alepa": 1.39 },
-  "Butter": { "Lidl": 2.49, "S-Market": 3.29, "Prisma": 2.89, "K-Citymarket": 3.49, "K-Supermarket": 3.59, "Alepa": 3.69 },
-  "Chicken": { "Lidl": 5.99, "S-Market": 7.49, "Prisma": 6.99, "K-Citymarket": 7.89, "K-Supermarket": 7.99, "Alepa": 8.29 },
-  "Apple": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
-  "Orange": { "Lidl": 1.79, "S-Market": 2.29, "Prisma": 2.09, "K-Citymarket": 2.39, "K-Supermarket": 2.49, "Alepa": 2.59 },
-  "Potato": { "Lidl": 1.49, "S-Market": 1.99, "Prisma": 1.79, "K-Citymarket": 2.09, "K-Supermarket": 2.19, "Alepa": 2.29 }
+  "Jogurtti": { "Lidl": 0.79, "S-Market": 1.19, "Prisma": 0.99, "K-Citymarket": 1.29, "K-Supermarket": 1.35, "Alepa": 1.39 },
+  "Voi": { "Lidl": 2.49, "S-Market": 3.29, "Prisma": 2.89, "K-Citymarket": 3.49, "K-Supermarket": 3.59, "Alepa": 3.69 },
+  "Jauheliha": { "Lidl": 3.99, "S-Market": 4.99, "Prisma": 4.49, "K-Citymarket": 5.29, "K-Supermarket": 5.39, "Alepa": 5.49 },
+  "Broilerin": { "Lidl": 5.99, "S-Market": 7.49, "Prisma": 6.99, "K-Citymarket": 7.89, "K-Supermarket": 7.99, "Alepa": 8.29 },
+  "Omena": { "Lidl": 1.99, "S-Market": 2.49, "Prisma": 2.29, "K-Citymarket": 2.59, "K-Supermarket": 2.69, "Alepa": 2.79 },
+  "Appelsiini": { "Lidl": 1.79, "S-Market": 2.29, "Prisma": 2.09, "K-Citymarket": 2.39, "K-Supermarket": 2.49, "Alepa": 2.59 },
+  "Peruna": { "Lidl": 1.49, "S-Market": 1.99, "Prisma": 1.79, "K-Citymarket": 2.09, "K-Supermarket": 2.19, "Alepa": 2.29 },
+  "Porkkana": { "Lidl": 1.39, "S-Market": 1.69, "Prisma": 1.59, "K-Citymarket": 1.79, "K-Supermarket": 1.85, "Alepa": 1.99 },
+  "Kurkku": { "Lidl": 0.89, "S-Market": 1.29, "Prisma": 1.09, "K-Citymarket": 1.39, "K-Supermarket": 1.45, "Alepa": 1.49 },
+  "Sipuli": { "Lidl": 1.19, "S-Market": 1.59, "Prisma": 1.39, "K-Citymarket": 1.69, "K-Supermarket": 1.75, "Alepa": 1.79 }
 };
 
 // Helper: normalize product names
