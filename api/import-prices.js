@@ -75,14 +75,11 @@ module.exports = async (req, res) => {
           continue;
         }
 
-        // Insert/update price
+        // Convert price to cents and insert as new record (no UPSERT) for price history
+        const priceCents = Math.round(price * 100);
         await sql`
-          INSERT INTO prices (product_id, store_id, price, recorded_at)
-          VALUES (${productMatch.id}, ${storeMatch.id}, ${price}, NOW())
-          ON CONFLICT (product_id, store_id)
-          DO UPDATE SET
-            price = ${price},
-            recorded_at = NOW()
+          INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+          VALUES (${productMatch.id}, ${storeMatch.id}, ${priceCents}, NOW())
         `;
 
         results.updated++;
