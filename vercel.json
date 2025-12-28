@@ -19,16 +19,5 @@
         }
       ]
     }
-  ],
-  "functions": {
-    "api/fetch-prices.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
-  "git": {
-    "deploymentEnabled": {
-      "claude/price-comparison-app-km6Wj": true
-    }
-  }
+  ]
 }
