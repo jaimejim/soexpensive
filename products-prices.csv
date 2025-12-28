@@ -1,0 +1,307 @@
+store,product,category,unit,price_euros
+K-Citymarket,Banaani,Fruits,kg,1.69
+K-Citymarket,Kurkku,Vegetables,kpl,1.99
+K-Citymarket,Miniluumutomaatti,Vegetables,250g,0.99
+K-Citymarket,Tomaatti,Vegetables,kg,2.99
+K-Citymarket,Jääsalaatti,Vegetables,100g,1.39
+K-Citymarket,Klementiini,Fruits,kg,4.49
+K-Citymarket,Rypäle tumma siemenetön,Fruits,500g,3.69
+K-Citymarket,Sitruuna,Fruits,kg,2.89
+K-Citymarket,Suippopaprika,Vegetables,200g,1.89
+K-Citymarket,Rypäle vihreä siemenetön,Fruits,500g,3.69
+K-Citymarket,Persimon,Fruits,kg,3.49
+K-Citymarket,Appelsiini,Fruits,kg,2.09
+K-Citymarket,Päärynä Conference,Fruits,kg,2.69
+K-Citymarket,Porkkana,Vegetables,1kg,1.09
+K-Citymarket,Sipuli,Vegetables,kg,0.99
+K-Citymarket,Omena Royal Gala,Fruits,kg,2.49
+K-Citymarket,Avokado,Fruits,kpl,7.99
+K-Citymarket,Punasipuli,Vegetables,kg,2.19
+K-Citymarket,Omena Red Delicious,Fruits,kg,2.95
+K-Citymarket,Maustekurkku,Vegetables,kpl,5.95
+K-Citymarket,Lime,Fruits,kg,3.89
+K-Citymarket,Peruna Annabelle,Vegetables,1kg,1.29
+K-Citymarket,Jäävuorisalaatti,Vegetables,kpl,3.49
+K-Citymarket,Pensasmustikka,Fruits,300g,4.99
+K-Citymarket,Kirsikkatomaatti,Vegetables,250g,1.99
+K-Citymarket,Kiivi,Fruits,500g,1.49
+K-Citymarket,Omena Golden Delicious,Fruits,kg,2.49
+K-Citymarket,Bataatti,Vegetables,kg,1.99
+K-Citymarket,Omena Idared,Fruits,kg,1.25
+K-Citymarket,Paprika,Vegetables,300g,2.79
+K-Citymarket,Parsakaali,Vegetables,400g,1.49
+K-Citymarket,Inkivääri,Vegetables,kg,5.95
+K-Citymarket,Avokado pikkuavokado,Fruits,500g,3.49
+K-Citymarket,Kevätsipuli,Vegetables,100g,2.39
+K-Citymarket,Paprika punainen,Vegetables,kg,4.99
+K-Citymarket,Sipuli keltasipuli,Vegetables,350g,0.99
+K-Citymarket,Tomaatti helmitomaatti punainen pikari,Vegetables,200g,3.95
+K-Citymarket,Valkosipuli,Vegetables,kg,11.49
+K-Citymarket,Kesäkurpitsa,Vegetables,kg,3.49
+K-Citymarket,Salaatti Juicy,Vegetables,125g,2.09
+K-Citymarket,Granaattiomena,Fruits,kg,4.95
+K-Citymarket,Peruna yleisperuna,Vegetables,2kg,1.90
+K-Citymarket,Luumutomaatti,Vegetables,500g,1.89
+K-Citymarket,Sipuli makea sipuli,Vegetables,350g,1.99
+K-Citymarket,Salaatti friseesalaatti,Vegetables,100g,1.49
+K-Citymarket,Veriappelsiini,Fruits,750g,2.49
+K-Citymarket,Porkkana naposteluporkkana,Vegetables,250g,1.39
+K-Citymarket,Omena Granny Smith,Fruits,kg,2.39
+K-Citymarket,Salaatti pikkusalaatti,Vegetables,200g,1.99
+K-Citymarket,Vadelma,Fruits,125g,3.79
+K-Citymarket,Peruna Siikli,Vegetables,1kg,1.49
+K-Citymarket,Peruna kiinteä,Vegetables,2kg,1.89
+K-Citymarket,Purjo,Vegetables,kpl,3.49
+K-Citymarket,Peruna sopivasti kiinteä,Vegetables,kg,0.75
+K-Citymarket,Kukkakaali,Vegetables,kpl,3.19
+K-Citymarket,Chili punainen,Vegetables,50g,1.49
+K-Citymarket,Ruusukaali,Vegetables,400g,1.29
+K-Citymarket,Peruna jauhoinen,Vegetables,2kg,1.89
+K-Citymarket,Uuniperuna,Vegetables,kg,1.99
+K-Citymarket,Peruna pikkuperuna,Vegetables,1kg,1.29
+K-Citymarket,Punajuuri,Vegetables,kg,1.29
+K-Citymarket,Chili paprika punainen,Vegetables,kg,9.95
+K-Citymarket,Peruna juhlaperuna,Vegetables,1kg,1.59
+K-Citymarket,Tomaatti terttutomaatti,Vegetables,500g,4.89
+K-Citymarket,Omena Rubinola,Fruits,kg,3.95
+K-Citymarket,Lanttu,Vegetables,kg,1.49
+K-Citymarket,Rucola,Vegetables,65g,1.59
+K-Citymarket,Salaatti Provence,Vegetables,150g,2.59
+K-Citymarket,Herkkusieni,Vegetables,200g,2.99
+K-Citymarket,Hunajameloni,Fruits,kpl,2.39
+K-Citymarket,Keräkaali,Vegetables,kpl,1.25
+K-Citymarket,Herkkusieni jumbo,Vegetables,kpl,6.95
+K-Citymarket,Bimi varsiparsakaali,Vegetables,200g,2.49
+K-Citymarket,Salaatti perhesalaattisekoitus,Vegetables,300g,2.49
+K-Citymarket,Mango,Fruits,kpl,4.99
+K-Citymarket,Valkosipulikurkku,Vegetables,kpl,9.89
+K-Citymarket,Aitonakki Perinteinen,Meat,360g,1.99
+K-Citymarket,Jauheliha sika-nauta,Meat,300g,2.05
+K-Citymarket,Popsi Iso Viitonen,Meat,900g,2.49
+K-Citymarket,Jauhis nauta-herne,Meat,400g,5.99
+K-Citymarket,Jauheliha nauta,Meat,400g,6.19
+K-Citymarket,Lenkki sininen,Meat,580g,2.99
+K-Citymarket,Nakkimakkara,Meat,280g,2.59
+K-Citymarket,Jauheliha nauda,Meat,400g,5.19
+K-Citymarket,Jauheliha sika-nauta,Meat,400g,3.15
+K-Citymarket,Nakki wanhanajan,Meat,380g,4.49
+K-Citymarket,Grillimakkara,Meat,400g,2.49
+K-Citymarket,Lauantaimakkara,Meat,225g,1.45
+K-Citymarket,Jauheliha kana,Meat,400g,2.99
+K-Citymarket,Kalkkunaleike,Meat,200g,2.99
+K-Citymarket,Saunapalvi,Meat,350g,2.99
+K-Citymarket,Fileesuikale kana hunaja,Meat,300g,2.99
+K-Citymarket,Meetvursti,Meat,220g,2.99
+K-Citymarket,Kalkkunanfilee,Meat,300g,3.99
+K-Citymarket,Jauheliha sika-nauta,Meat,400g,3.75
+K-Citymarket,Fileesuikale kana naturel,Meat,250g,2.99
+K-Citymarket,Saunapalvikinkku,Meat,180g,2.99
+K-Citymarket,Kalkkunanakki,Meat,280g,4.50
+K-Citymarket,Meetvursti kevyt,Meat,200g,2.99
+K-Citymarket,Jauheliha sika-nauta,Meat,700g,6.39
+K-Citymarket,Kinkkumakkara,Meat,300g,2.29
+K-Citymarket,Fileesuikale kana pippurinen,Meat,300g,2.99
+K-Citymarket,Kalkkuna,Meat,200g,3.99
+K-Citymarket,Fileesuikale kana hunajamarinoitu,Meat,450g,3.79
+K-Citymarket,Perinteinen Wilhelm,Meat,400g,2.99
+K-Citymarket,Fileesuikale kana hunajamarinadissa,Meat,450g,4.79
+K-Citymarket,Karjalanpaisti,Meat,700g,7.99
+K-Citymarket,Fileesuikale kana maustamaton,Meat,250g,2.49
+K-Citymarket,Saunapalvikinkku ylikypsä,Meat,300g,3.99
+K-Citymarket,Nakki lihaisa,Meat,280g,4.50
+K-Citymarket,Pepperoni,Meat,100g,4.50
+K-Citymarket,Fileesuikale kana miedosti suolattu,Meat,430g,3.85
+K-Citymarket,Grillimakkara Huiluntuhti,Meat,400g,3.85
+K-Citymarket,Kanafilee pehmeä savu,Meat,200g,3.89
+K-Citymarket,Jauheliha nauta,Meat,700g,9.99
+K-Citymarket,Jauheliha nauta-sika,Meat,300g,3.15
+K-Citymarket,Fileesuikale kana maustamaton,Meat,400g,4.79
+K-Citymarket,Jauheliha nauta,Meat,400g,5.95
+K-Citymarket,Maksamakkara,Meat,150g,1.49
+K-Citymarket,Nakkimakkara kuoreton,Meat,300g,3.60
+K-Citymarket,Nakkimakkara,Meat,400g,4.49
+K-Citymarket,Paistijauheliha nauta,Meat,kg,19.95
+K-Citymarket,Meetvursti ultrakevyt,Meat,100g,3.39
+K-Citymarket,Siipi tulisesti marinoitu,Meat,900g,3.99
+K-Citymarket,Salami Milanon,Meat,150g,2.99
+K-Citymarket,Kalkkuna,Meat,150g,5.50
+K-Citymarket,Juhlakinkku,Meat,5kg,10.00
+K-Citymarket,Liekkisiivet,Meat,700g,6.90
+K-Citymarket,Saunapalvikinkku,Meat,300g,2.99
+K-Citymarket,Paistijauheliha nauta,Meat,400g,6.75
+K-Citymarket,Paistileike kana,Meat,300g,2.99
+K-Citymarket,Karjalanpaisti,Meat,kg,14.90
+K-Citymarket,Pizzasuikale,Meat,200g,1.45
+K-Citymarket,Korppukinkku,Meat,180g,2.99
+K-Citymarket,Minuuttipihvi kana yrtti-valkosipuli,Meat,350g,4.99
+K-Citymarket,Kinkku,Meat,180g,2.79
+K-Citymarket,Meetvursti,Meat,150g,4.50
+K-Citymarket,Grillimakkara chili-sulatejuusto,Meat,350g,2.99
+K-Citymarket,Grillimakkara juusto,Meat,350g,2.99
+K-Citymarket,Grillinakki,Meat,300g,2.25
+K-Citymarket,Pepperonisalami,Meat,100g,4.00
+K-Citymarket,Maksamakkara,Meat,300g,2.69
+K-Citymarket,Kultakinkku,Meat,200g,3.99
+K-Citymarket,Grillimakkara Atrilli,Meat,400g,1.69
+K-Citymarket,Uunikinkku,Meat,180g,2.99
+K-Citymarket,Siipi paahdettu,Meat,700g,5.99
+K-Citymarket,Meetvursti kevyt,Meat,150g,4.50
+K-Citymarket,Kalkkunaleike,Meat,300g,2.99
+K-Citymarket,Jamón Serrano,Meat,100g,3.49
+K-Citymarket,Hunajasiivet,Meat,700g,6.90
+K-Citymarket,Savusuikale,Meat,200g,1.39
+K-Citymarket,Kanafilee Fajitas,Meat,200g,3.89
+K-Citymarket,Chorizo,Meat,230g,3.39
+K-Citymarket,Löylylenkki,Meat,400g,2.99
+K-Citymarket,Karjalanpaisti,Meat,500g,8.15
+K-Citymarket,Pippurikalkkuna,Meat,200g,3.99
+K-Citymarket,Pippurimeetvursti,Meat,150g,4.50
+K-Citymarket,Saunapalvi ylikypsä,Meat,400g,7.00
+K-Citymarket,Lauantaimakkara,Meat,225g,1.19
+K-Citymarket,Kinkku pippurinen,Meat,150g,2.79
+K-Citymarket,Keittokinkku,Meat,300g,3.99
+K-Citymarket,Kanaleike hunajapaahdettu,Meat,200g,2.99
+K-Citymarket,Jauheliha nauta,Meat,400g,7.15
+K-Citymarket,Palvisuikale,Meat,200g,0.99
+K-Citymarket,Fileesuikale kana hunaja,Meat,300g,3.99
+K-Citymarket,Kalkkunanfilee,Meat,150g,3.29
+K-Citymarket,Kalkkunaleike,Meat,250g,3.79
+K-Citymarket,Kinkku paahdettu,Meat,200g,2.99
+K-Citymarket,Kabanossi,Meat,400g,3.65
+K-Citymarket,Fileerulla kalkkuna,Meat,1kg,17.95
+K-Citymarket,Filee kalkkuna,Meat,500g,17.65
+K-Citymarket,Palvikinkku,Meat,400g,4.99
+K-Citymarket,Pekoni,Meat,150g,3.39
+K-Citymarket,Jauheliha nauta-sika kevyt,Meat,600g,6.99
+K-Citymarket,Keittokinkku,Meat,210g,2.79
+K-Citymarket,Kinkkuleikkele,Meat,300g,3.85
+K-Citymarket,Lenkki punainen,Meat,500g,2.99
+K-Citymarket,Minuuttifilee kana hunaja,Meat,260g,3.99
+K-Citymarket,Jauheliha kana,Meat,600g,4.49
+K-Citymarket,Saunapalvikinkku,Meat,210g,2.59
+K-Citymarket,Palvikinkku,Meat,200g,2.99
+K-Citymarket,Pekoni amerikan lastu,Meat,150g,2.79
+K-Citymarket,Korppukinkku,Meat,200g,2.99
+K-Citymarket,Kanalastu paahdettu,Meat,180g,3.99
+K-Citymarket,Palvikinkku,Meat,200g,2.99
+K-Citymarket,Voileipämeetvursti,Meat,200g,4.75
+K-Citymarket,Voileipäleikkele,Meat,200g,2.39
+K-Citymarket,Wings crispy,Meat,700g,3.99
+K-Citymarket,Meetvursti valkosipuli,Meat,200g,2.99
+K-Citymarket,Fileeleike kana,Meat,180g,2.79
+K-Citymarket,Suikale Naturelli,Meat,330g,4.99
+K-Citymarket,Leikkelemakkara valkosipuli,Meat,150g,4.00
+K-Citymarket,Lauantaimakkara kevyt,Meat,225g,1.45
+K-Citymarket,Pekoni,Meat,150g,7.00
+K-Citymarket,Rintafilee kana maustamaton,Meat,600g,7.99
+K-Citymarket,Palvikalkkuna,Meat,200g,3.15
+K-Citymarket,Pekoni amerikan tuplapakkaus,Meat,280g,4.35
+K-Citymarket,Korppukalkkuna,Meat,150g,2.99
+K-Citymarket,Kanafilee mustapippuri,Meat,200g,3.89
+K-Citymarket,Reisikoipi kana marinoitu,Meat,1.1kg,3.99
+K-Citymarket,Maksapasteija,Meat,250g,2.95
+K-Citymarket,Lihasuikale,Meat,400g,4.35
+K-Citymarket,Balkan,Meat,225g,3.50
+K-Citymarket,Salame Milano,Meat,70g,2.49
+K-Citymarket,Filee kana Naturelli,Meat,320g,4.85
+K-Citymarket,Pikkuprinssi,Meat,300g,2.99
+K-Citymarket,Uunikinkku,Meat,150g,5.50
+K-Citymarket,Kinkku kevyesti savustettu,Meat,150g,2.79
+K-Citymarket,Paistileike kana yrttiöljy,Meat,430g,4.99
+K-Citymarket,Ohutleike kana,Meat,340g,4.85
+K-Citymarket,Jauheliha kana,Meat,300g,3.15
+K-Citymarket,Filee kana persilja-valkosipuli,Meat,390g,6.25
+K-Citymarket,Herkkulenkki,Meat,450g,3.99
+K-Citymarket,Kasslerpihvi,Meat,500g,5.29
+K-Citymarket,Minuuttifilee kana hunaja,Meat,780g,8.99
+K-Citymarket,Palvikinkku,Meat,400g,5.69
+K-Citymarket,Fileeleike kana,Meat,300g,3.99
+K-Citymarket,Kebablastu,Meat,200g,4.70
+K-Citymarket,Suolaliha,Meat,150g,4.25
+K-Citymarket,Siskonmakkara,Meat,300g,5.00
+K-Citymarket,Jamón Serrano,Meat,70g,3.65
+K-Citymarket,Prosciutto Crudo,Meat,120g,4.49
+K-Citymarket,Poron kylmäsavupaisti,Meat,80g,7.99
+K-Citymarket,Valkosipulimeetvursti,Meat,150g,4.50
+K-Citymarket,Yönakki,Meat,240g,2.99
+K-Citymarket,Sisäfilee kana,Meat,600g,8.69
+K-Citymarket,Minuuttifilee kana pippurinen,Meat,780g,8.99
+K-Citymarket,Leikkelemakkara herkkusieni,Meat,150g,4.00
+K-Citymarket,Saunapalvileikkele,Meat,200g,2.39
+K-Citymarket,Kinkku grillattu,Meat,200g,3.85
+K-Citymarket,Minuuttifilee kana naturel,Meat,570g,8.99
+K-Citymarket,Maksamakkara,Meat,300g,2.09
+K-Citymarket,Hyytelö maalaishyytelö,Meat,350g,4.69
+K-Citymarket,Saaristolaismeetvursti,Meat,150g,2.99
+K-Citymarket,Kana,Meat,200g,5.00
+K-Citymarket,Sisäfileet kana rapeat Ranch,Meat,400g,5.99
+K-Citymarket,Siskonmakkara,Meat,500g,5.15
+K-Citymarket,Jauheliha kana,Meat,400g,3.65
+K-Citymarket,Ryynimakkara,Meat,400g,2.99
+K-Citymarket,Kebab grillattu,Meat,300g,5.15
+K-Citymarket,Keittokinkku,Meat,270g,3.99
+K-Citymarket,Grillimakkara camping,Meat,400g,2.99
+K-Citymarket,Fileeviipaleet rapeat,Meat,300g,4.39
+K-Citymarket,Chilikana,Meat,150g,2.99
+K-Citymarket,Nakki kuoreton,Meat,600g,2.79
+K-Citymarket,Ulkofile nauta pihvi,Meat,kg,39.95
+K-Citymarket,Jauheliha nauta,Meat,kg,17.95
+K-Citymarket,Kinkkuvalmiste suikale,Meat,200g,2.65
+K-Citymarket,Fileepihvi ranch,Meat,640g,7.90
+K-Citymarket,Maksamakkara viipaloitu,Meat,250g,2.49
+K-Citymarket,Savumuikut,Fish,400g,9.25
+K-Citymarket,Savulohi,Fish,400g,8.95
+K-Citymarket,Kevytmaito,Dairy,1L,0.95
+K-Citymarket,Kevytmaitojuoma laktoositon,Dairy,1L,1.29
+K-Citymarket,Maito rasvaton,Dairy,1L,0.85
+K-Citymarket,Maito täysmaito,Dairy,1L,1.39
+K-Citymarket,Maitojuoma laktoositon,Dairy,1L,1.55
+K-Citymarket,Maitojuoma laktoositon rasvaton,Dairy,1L,1.29
+K-Citymarket,Kaurajuoma iKaffe,Dairy,1L,1.95
+K-Citymarket,Kaurajuoma kahviin,Dairy,1L,1.99
+K-Citymarket,Kaurajuoma Barista,Dairy,1L,1.89
+K-Citymarket,Kaurajuoma,Dairy,1L,1.19
+K-Citymarket,Kaurajuoma Barista vanilja,Dairy,0.5L,2.79
+K-Citymarket,Kaurajuoma kahviin,Dairy,0.5L,1.49
+K-Citymarket,Kaurajuoma Barista,Dairy,1L,1.59
+K-Citymarket,Kahvi Juhla Mokka suodatinjauhatus,Beverages,500g,9.35
+K-Citymarket,Kahvi Juhla Mokka Tumma Paahto,Beverages,500g,9.35
+K-Citymarket,Kahvi Perinteinen,Beverages,500g,8.99
+K-Citymarket,Spaghetti,Pantry,1kg,3.49
+S-Market,Klementiini,Fruits,kg,2.49
+S-Market,Persimon,Fruits,kg,2.89
+S-Market,Sitruuna,Fruits,kg,2.89
+S-Market,Omena Red Delicious,Fruits,kg,2.49
+S-Market,Paprika punainen,Vegetables,kg,5.79
+S-Market,Bataatti,Vegetables,kg,1.99
+S-Market,Porkkana,Vegetables,2kg,1.69
+S-Market,Banaani,Fruits,kg,1.89
+S-Market,Kurkku,Vegetables,kpl,1.23
+S-Market,Veriappelsiini,Fruits,1kg,2.59
+S-Market,Tomaatti,Vegetables,kg,3.89
+S-Market,Mandariini,Fruits,kg,3.59
+S-Market,Jääsalaatti,Vegetables,100g,1.39
+S-Market,Miniluumutomaatti,Vegetables,250g,1.39
+S-Market,Rypäle tumma siemenetön,Fruits,500g,3.69
+S-Market,Kevytmaito,Dairy,1L,0.95
+S-Market,Kevytmaitojuoma laktoositon,Dairy,1L,1.29
+S-Market,Maito rasvaton,Dairy,1L,0.85
+S-Market,Maito täysmaito,Dairy,1L,1.39
+S-Market,Maitojuoma laktoositon,Dairy,1L,1.55
+S-Market,Maitojuoma laktoositon rasvaton,Dairy,1L,1.29
+S-Market,Kaurajuoma iKaffe,Dairy,1L,1.95
+S-Market,Kaurajuoma kahviin,Dairy,1L,1.99
+S-Market,Kaurajuoma Barista,Dairy,1L,1.89
+S-Market,Kaurajuoma,Dairy,1L,1.19
+S-Market,Kaurajuoma Barista,Dairy,1L,1.59
+S-Market,Kahvi Juhla Mokka suodatinjauhatus,Beverages,500g,9.35
+S-Market,Kahvi Juhla Mokka Tumma Paahto,Beverages,500g,9.35
+S-Market,Kahvi Perinteinen,Beverages,500g,8.99
+S-Market,Jauhis nauta-herne,Meat,400g,4.69
+S-Market,Jauheliha nauta,Meat,400g,5.35
+S-Market,Jauheliha sika-nauta,Meat,400g,2.60
+S-Market,Jauheliha nauta,Meat,600g,5.09
+S-Market,Jauheliha kana,Meat,400g,2.99
+S-Market,Savumuikut,Fish,400g,9.25
+S-Market,Savulohi,Fish,400g,8.95
+S-Market,Spaghetti,Pantry,1kg,3.49

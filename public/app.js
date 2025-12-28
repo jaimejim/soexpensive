@@ -235,9 +235,10 @@ function renderProducts() {
             const isCheapest = store === cheapestStore;
             const priceClass = isCheapest ? 'cheapest' : '';
 
-            // Add freshness indicator: K-Citymarket has verified data
-            const isVerified = store === 'K-Citymarket';
-            const indicator = isVerified ? '<sup class="verified-indicator" title="Verified price">✓</sup>' : '<sup class="estimate-indicator" title="Estimated price">~</sup>';
+            // Add freshness indicator: K-Citymarket, S-Market, Prisma have verified data
+            const verifiedStores = ['K-Citymarket', 'S-Market', 'Prisma'];
+            const isVerified = verifiedStores.includes(store);
+            const indicator = isVerified ? '<sup class="verified-indicator" title="Verified price">✓</sup>' : '';
 
             return `<td class="price ${priceClass}">€${priceData.price.toFixed(2)}${indicator}</td>`;
         }).join('');
