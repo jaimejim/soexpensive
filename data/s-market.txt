@@ -1,0 +1,51 @@
+PRODUCT NAME | PRICE (€/unit) | PRICE (€/kg or €/l)
+
+HEDELMÄT JA VIHANNEKSET (Fruits & Vegetables)
+Coop klementtiini | 0.33 | 2.49
+Coop Persimon | 0.57 | 2.89
+Coop sitruuna | 0.64 | 2.89
+Omena Red Delicious | 0.71 | 2.49
+Paprika punainen | 1.30 | 5.79
+Batatti | 0.47 | 1.99
+Kotimaista porkkaana 2 kg | 1.69 | 0.85
+Chiquita banaani | 0.35 | 1.89
+Kotimaista kurkku | 1.23 | 3.79
+Coop veriappelsiini 1 kg | 2.59 | 2.59
+Coop klementiini | 0.33 | 2.49
+Tomaatti Suomi | 0.46 | 3.89
+Mandariini Mandared | 0.47 | 3.59
+Coop sitruuna | 0.64 | 2.89
+Kotimaista jääsalaatti 100g Suomi | 1.39 | 13.90
+Coop miniluumutomaatti 250g | 1.39 | 5.56
+Coop tumma siemenetön viinirypäle 500g | 3.69 | 7.38
+
+MAITO, MUNAT JA RASVAT (Milk, Eggs & Fats)
+Kotimaista kevytmaito 1L | 0.95 | 0.95
+Kotimaista laktoositon kevytmaitojuoma 1L | 1.29 | 1.29
+Kotimaista rasvaton maito 1l | 0.85 | 0.85
+Kotimaista täysmaito 1l | 1.39 | 1.39
+Kotimaista laktoositon 3% maitojuoma 1L ESL | 1.55 | 1.55
+Kotimaista laktoositon 1L rasvaton maitojuoma | 1.29 | 1.29
+Oatly iKaffe kaurajuoma 1L | 1.95 | 1.95
+Elovena 1l kaurajuoma kahviin | 1.99 | 1.99
+Oddlygood® Barista kaurajuoma 1l UHT gluteeniton | 1.89 | 1.89
+Kotimaista 1l kaurajuoma UHT | 1.19 | 1.19
+Coop Barista kaurajuoma 1l | 1.59 | 1.59
+
+KAHVIT, TEET JA MEHUT (Coffees, Teas & Juices)
+Paulig Juhla Mokka kahvi suodatinjauhatus 500g | 9.35 | 18.70
+Kulta Katriina Perinteinen kahvi suodatinjauhatus 500g | 8.99 | 17.98
+
+LIHA JA KASVIPROTEIINIT (Meat & Plant Proteins)
+Snellman Kevyt nauta-herne jauhis 7,5% 400g | 4.69 | 11.73
+Atria Parempi Nauta Jauheliha 10% 400g | 5.35 | 13.37
+Kotimaista sika-nauta jauheliha 23% 400g | 2.60 | 6.50
+Kotimaista naudan jauheliha 17% 600g | 5.09 | 12.73
+Kotimaista kanan jauheliha 4% 400g | 2.99 | 7.48
+
+KALA JA MERENELÄVÄT (Fish & Seafood)
+Riimin Savumuikut 400g | 9.25 | 23.13
+Riimin Savulohi 400g | 8.95 | 22.37
+
+PASTAT, RIISIT JA NUUDELIT (Pasta, Rice & Noodles)
+Rummo Spaghetti no 3 1kg | 3.49 | 3.49

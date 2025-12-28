@@ -1,223 +1,1059 @@
-const db = require('./db');
+/**
+ * Seed database with normalized products from real scraped data
+ * Generated: 2025-12-28T20:27:00.482Z
+ *
+ * Data sources:
+ * - K-Citymarket: Real prices collected 2025-12-28
+ * - S-Market: Real prices collected 2025-12-28
+ */
 
-// Finnish supermarket stores
+const { sql } = require('@vercel/postgres');
+
+// Normalized products (brand names stripped)
+const products = [
+  { name: 'Banaani piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Kurkku piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Miniluumutomaatti 250g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Tomaatti piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Jääsalaatti 100g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Klementiini piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Tumma Siemenetön Rypäle 500g', category: 'Fruits', unit: 'pack' },
+  { name: 'Sitruuna piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Suippopaprika 200g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Vihreä Siemenetön Rypäle 500g', category: 'Fruits', unit: 'pack' },
+  { name: 'Klementiini 15kg', category: 'Fruits', unit: 'pack' },
+  { name: 'Persimon piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Appelsiini piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Päärynä Conference piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Porkkana 1kg', category: 'Vegetables', unit: 'pack' },
+  { name: 'Sipuli piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Royal Gala Omena piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Syöntikypsä Avokado piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Punasipuli piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Omena Red Del piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Kurkku 300g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Maustekurkku piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Järvikylä Tilli Ruukku pack', category: 'Other', unit: 'pack' },
+  { name: 'Porkkana 500g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Lime piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Annabelle Peruna 1kg', category: 'Vegetables', unit: 'pack' },
+  { name: 'Jäävuorisalaatti piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Pensasmustikka 300g', category: 'Fruits', unit: 'pack' },
+  { name: 'Kirsikkatomaatti 250g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Kiivi 500g', category: 'Fruits', unit: 'pack' },
+  { name: 'Golden Delicious Omena piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Bataatti piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Omena Idared piece', category: 'Fruits', unit: 'piece' },
+  { name: 'Paprika 300g 2 Kpl', category: 'Vegetables', unit: 'pack' },
+  { name: 'Espanjalainen Parsakaali 400g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Inkivääri piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Pensasmustikka 125g', category: 'Fruits', unit: 'pack' },
+  { name: 'Syöntikypsä Pikkuavokado 500g', category: 'Fruits', unit: 'pack' },
+  { name: 'Kevätsipuli 100g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Paprika Punainen piece', category: 'Vegetables', unit: 'piece' },
+  { name: 'Keltasipuli 350g', category: 'Vegetables', unit: 'pack' },
+  { name: 'Klementtiini', category: 'Other', unit: 'kpl' },
+  { name: 'Omena Red Delicious', category: 'Fruits', unit: 'kpl' },
+  { name: 'Batatti', category: 'Other', unit: 'kpl' },
+  { name: 'Porkkaana 2', category: 'Other', unit: 'kg' },
+  { name: 'Veriappelsiini 1', category: 'Fruits', unit: 'kg' },
+  { name: 'Mandariini Mandared', category: 'Fruits', unit: 'kpl' },
+  { name: 'Tumma Siemenetön Viinirypäle 500g', category: 'Fruits', unit: '500g' },
+  { name: 'Kevytmaito 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Laktoositon Kevytmaitojuoma 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Rasvaton Maito 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Täysmaito 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Laktoositon 3 Maitojuoma 1l Esl', category: 'Dairy', unit: '1L' },
+  { name: 'Laktoositon 1l Rasvaton Maitojuoma', category: 'Dairy', unit: '1L' },
+  { name: 'Oatly Ikaffe Kaurajuoma 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Elovena 1l Kaurajuoma Kahviin', category: 'Dairy', unit: '1L' },
+  { name: 'Oddlygood Barista Kaurajuoma 1l Uht Gluteeniton', category: 'Dairy', unit: '1L' },
+  { name: '1l Kaurajuoma Uht', category: 'Dairy', unit: '1L' },
+  { name: 'Barista Kaurajuoma 1l', category: 'Dairy', unit: '1L' },
+  { name: 'Paulig Juhla Mokka Kahvi Suodatinjauhatus 500g', category: 'Beverages', unit: '500g' },
+  { name: 'Kulta Katriina Perinteinen Kahvi Suodatinjauhatus 500g', category: 'Beverages', unit: '500g' },
+  { name: 'Snellman Kevyt Nautaherne Jauhis 75 400g', category: 'Other', unit: '400g' },
+  { name: 'Atria Parempi Nauta Jauheliha 10 400g', category: 'Meat', unit: '400g' },
+  { name: 'Sikanauta Jauheliha 23 400g', category: 'Meat', unit: '400g' },
+  { name: 'Naudan Jauheliha 17 600g', category: 'Meat', unit: '600g' },
+  { name: 'Kanan Jauheliha 4 400g', category: 'Meat', unit: '400g' },
+  { name: 'Riimin Savumuikut 400g', category: 'Other', unit: '400g' },
+  { name: 'Riimin Savulohi 400g', category: 'Fish', unit: '400g' },
+  { name: 'Rummo Spaghetti No 3 1kg', category: 'Pantry', unit: '1kg' },
+];
+
 const stores = [
   'S-Market',
-  'Prisma',
+  'Prisma', // Same chain as S-Market, uses S-Market prices
   'K-Citymarket',
   'K-Supermarket',
   'Lidl',
   'Alepa'
 ];
 
-// Sample Finnish supermarket products (realistic items)
-const products = [
-  // Dairy
-  { name: 'Valio Eila Rasvaton maito', category: 'Dairy', unit: '1L' },
-  { name: 'Valio Kevytmaito 1%', category: 'Dairy', unit: '1L' },
-  { name: 'Valio Täysmaito 3,5%', category: 'Dairy', unit: '1L' },
-  { name: 'Valio Hyla Juustoviipale', category: 'Dairy', unit: '150g' },
-  { name: 'Valio Oltermanni juusto', category: 'Dairy', unit: '250g' },
-  { name: 'Arla Luomu jogurtti', category: 'Dairy', unit: '400g' },
-  { name: 'Valio Vanilja villi', category: 'Dairy', unit: '200g' },
-  { name: 'Valio Kermaviili', category: 'Dairy', unit: '200ml' },
+async function seed() {
+  console.log('🌱 Starting database seed with real scraped data...');
 
-  // Bread & Bakery
-  { name: 'Fazer Ruispalat täysjyvä', category: 'Bakery', unit: '320g' },
-  { name: 'Oululainen Reissumies', category: 'Bakery', unit: '500g' },
-  { name: 'Vaasan Täysjyvä', category: 'Bakery', unit: '400g' },
-  { name: 'Fazer Sämpylä', category: 'Bakery', unit: '6kpl' },
-  { name: 'Pirkka Vehnäleipä', category: 'Bakery', unit: '750g' },
-
-  // Meat
-  { name: 'HK Sininen Lenkki', category: 'Meat', unit: '350g' },
-  { name: 'Atria Broilerin koipi', category: 'Meat', unit: '600g' },
-  { name: 'Snellman Meetvursti', category: 'Meat', unit: '200g' },
-  { name: 'Pirkka Jauheliha 10%', category: 'Meat', unit: '400g' },
-  { name: 'Atria Possun ulkofile', category: 'Meat', unit: '400g' },
-
-  // Fish
-  { name: 'Mowi Lohifile', category: 'Fish', unit: '300g' },
-  { name: 'Abba MSC Silli', category: 'Fish', unit: '250g' },
-  { name: 'Apetit Norjan lohi', category: 'Fish', unit: '400g' },
-
-  // Vegetables
-  { name: 'Suomalainen Tomaatti', category: 'Vegetables', unit: 'kg' },
-  { name: 'Suomalainen Kurkku', category: 'Vegetables', unit: 'kpl' },
-  { name: 'Porkkana', category: 'Vegetables', unit: 'kg' },
-  { name: 'Suomalainen Peruna', category: 'Vegetables', unit: '2kg' },
-  { name: 'Sipuli', category: 'Vegetables', unit: 'kg' },
-  { name: 'Paprika punainen', category: 'Vegetables', unit: 'kg' },
-  { name: 'Salaatti Jäävuori', category: 'Vegetables', unit: 'kpl' },
-
-  // Fruits
-  { name: 'Banaani', category: 'Fruits', unit: 'kg' },
-  { name: 'Omena Suomi', category: 'Fruits', unit: 'kg' },
-  { name: 'Appelsiini', category: 'Fruits', unit: 'kg' },
-  { name: 'Mandariini', category: 'Fruits', unit: 'kg' },
-  { name: 'Päärynä', category: 'Fruits', unit: 'kg' },
-
-  // Frozen
-  { name: 'Apetit Kalapuikot', category: 'Frozen', unit: '250g' },
-  { name: 'Pirkka Pakasteherneet', category: 'Frozen', unit: '400g' },
-  { name: 'Saarioinen Lihapullat', category: 'Frozen', unit: '400g' },
-  { name: 'Apetit Pizza Margherita', category: 'Frozen', unit: '300g' },
-
-  // Pantry
-  { name: 'Pirkka Spagetti', category: 'Pantry', unit: '500g' },
-  { name: 'Pirkka Makaroni', category: 'Pantry', unit: '500g' },
-  { name: 'Pirkka Riisi pitkäjyväinen', category: 'Pantry', unit: '1kg' },
-  { name: 'Pirkka Vehnäjauho', category: 'Pantry', unit: '2kg' },
-  { name: 'Pirkka Sokeri', category: 'Pantry', unit: '1kg' },
-  { name: 'Pirkka Suola', category: 'Pantry', unit: '500g' },
-  { name: 'Pirkka Tomaattimurska', category: 'Pantry', unit: '400g' },
-  { name: 'Pirkka Ketsuppi', category: 'Pantry', unit: '500g' },
-  { name: 'Felix Sinappimajoneesi', category: 'Pantry', unit: '250g' },
-
-  // Beverages
-  { name: 'Pirkka Appelsiinimehu', category: 'Beverages', unit: '1L' },
-  { name: 'Pirkka Kivennäisvesi', category: 'Beverages', unit: '1,5L' },
-  { name: 'Coca-Cola', category: 'Beverages', unit: '1,5L' },
-  { name: 'Pirkka Omenamehu', category: 'Beverages', unit: '1L' },
-  { name: 'Valio Luomu Smoothie', category: 'Beverages', unit: '250ml' },
-
-  // Coffee & Tea
-  { name: 'Paulig Juhla Mokka', category: 'Coffee & Tea', unit: '500g' },
-  { name: 'Löfbergs Lila', category: 'Coffee & Tea', unit: '500g' },
-  { name: 'Lipton Tee', category: 'Coffee & Tea', unit: '100kpl' },
-
-  // Snacks
-  { name: 'Taffel Sipsit suola', category: 'Snacks', unit: '150g' },
-  { name: 'Fazer Sininen', category: 'Snacks', unit: '200g' },
-  { name: 'Geisha', category: 'Snacks', unit: '150g' },
-  { name: 'Panda Salmiakki', category: 'Snacks', unit: '200g' },
-  { name: 'Dumle Original', category: 'Snacks', unit: '100g' },
-
-  // Breakfast
-  { name: 'Fazer Kaurapuuro', category: 'Breakfast', unit: '1kg' },
-  { name: 'Pirkka Mysli', category: 'Breakfast', unit: '500g' },
-  { name: 'Pirkka Cornflakes', category: 'Breakfast', unit: '500g' },
-
-  // Cleaning
-  { name: 'Fairy astianpesuaine', category: 'Cleaning', unit: '500ml' },
-  { name: 'Pirkka WC-puhdistusaine', category: 'Cleaning', unit: '750ml' },
-
-  // Personal Care
-  { name: 'Colgate hammastahna', category: 'Personal Care', unit: '75ml' },
-  { name: 'Pirkka Shampoo', category: 'Personal Care', unit: '500ml' },
-  { name: 'Dove Suihkusaippua', category: 'Personal Care', unit: '250ml' }
-];
-
-// Generate realistic prices for Finnish market
-function generatePrice(category) {
-  const priceRanges = {
-    'Dairy': [0.99, 3.99],
-    'Bakery': [1.49, 4.99],
-    'Meat': [3.99, 12.99],
-    'Fish': [5.99, 15.99],
-    'Vegetables': [1.49, 4.99],
-    'Fruits': [1.99, 5.99],
-    'Frozen': [2.49, 6.99],
-    'Pantry': [0.99, 4.99],
-    'Beverages': [0.79, 2.99],
-    'Coffee & Tea': [3.99, 8.99],
-    'Snacks': [1.99, 4.99],
-    'Breakfast': [2.49, 5.99],
-    'Cleaning': [1.99, 4.99],
-    'Personal Care': [1.99, 6.99]
-  };
-
-  const [min, max] = priceRanges[category] || [1.99, 5.99];
-  const price = min + Math.random() * (max - min);
-  return Math.round(price * 100) / 100; // Round to 2 decimals
-}
-
-async function seedDatabase() {
   try {
-    console.log('Seeding database...');
-
-    // Initialize database
-    await db.initDatabase();
-
     // Insert stores
+    console.log('Creating stores...');
     const storeIds = {};
     for (const storeName of stores) {
-      const id = await db.addStore(storeName);
-      storeIds[storeName] = id;
-      console.log(`Added store: ${storeName} (ID: ${id})`);
+      const result = await sql`
+        INSERT INTO stores (name)
+        VALUES (${storeName})
+        ON CONFLICT (name) DO UPDATE SET name = ${storeName}
+        RETURNING id
+      `;
+      storeIds[storeName] = result.rows[0].id;
+      console.log(`  ✓ ${storeName}`);
     }
 
     // Insert products
-    const productIds = [];
+    console.log('\nCreating products...');
+    const productIds = {};
     for (const product of products) {
-      const result = await db.addProduct(product.name, product.category, product.unit);
-      productIds.push(result.lastInsertRowid);
-      console.log(`Added product: ${product.name}`);
+      const result = await sql`
+        INSERT INTO products (name, category, unit)
+        VALUES (${product.name}, ${product.category}, ${product.unit})
+        ON CONFLICT (name, category, unit) DO UPDATE
+        SET name = ${product.name}
+        RETURNING id
+      `;
+      const key = `${product.name}|${product.category}|${product.unit}`;
+      productIds[key] = result.rows[0].id;
     }
+    console.log(`  ✓ Created ${products.length} products`);
 
-    console.log('✓ Database seeded successfully!');
-    console.log(`✓ Added ${stores.length} stores`);
-    console.log(`✓ Added ${products.length} products`);
+    // Insert real prices from scraped data
+    console.log('\nInserting real prices from scraped data...');
+    const priceData = [
+  {
+    "name": "Banaani piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.3
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 0.4
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 0.33
+      },
+      {
+        "store": "S-Market",
+        "price": 0.35
+      }
+    ]
+  },
+  {
+    "name": "Kurkku piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.7
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 1.75
+      },
+      {
+        "store": "S-Market",
+        "price": 1.23
+      }
+    ]
+  },
+  {
+    "name": "Miniluumutomaatti 250g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.99
+      },
+      {
+        "store": "S-Market",
+        "price": 1.39
+      }
+    ]
+  },
+  {
+    "name": "Tomaatti piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.27
+      },
+      {
+        "store": "S-Market",
+        "price": 0.46
+      }
+    ]
+  },
+  {
+    "name": "Jääsalaatti 100g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.39
+      },
+      {
+        "store": "S-Market",
+        "price": 1.39
+      }
+    ]
+  },
+  {
+    "name": "Klementiini piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.49
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 0.16
+      },
+      {
+        "store": "S-Market",
+        "price": 0.33
+      }
+    ]
+  },
+  {
+    "name": "Tumma Siemenetön Rypäle 500g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 3.69
+      }
+    ]
+  },
+  {
+    "name": "Sitruuna piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.55
+      },
+      {
+        "store": "S-Market",
+        "price": 0.64
+      },
+      {
+        "store": "S-Market",
+        "price": 0.64
+      }
+    ]
+  },
+  {
+    "name": "Suippopaprika 200g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.89
+      }
+    ]
+  },
+  {
+    "name": "Vihreä Siemenetön Rypäle 500g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 3.69
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 3.69
+      }
+    ]
+  },
+  {
+    "name": "Klementiini 15kg",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 3.69
+      }
+    ]
+  },
+  {
+    "name": "Persimon piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.8
+      },
+      {
+        "store": "S-Market",
+        "price": 0.57
+      }
+    ]
+  },
+  {
+    "name": "Appelsiini piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.56
+      }
+    ]
+  },
+  {
+    "name": "Päärynä Conference piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.75
+      }
+    ]
+  },
+  {
+    "name": "Porkkana 1kg",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.09
+      }
+    ]
+  },
+  {
+    "name": "Sipuli piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.1
+      }
+    ]
+  },
+  {
+    "name": "Royal Gala Omena piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.4
+      }
+    ]
+  },
+  {
+    "name": "Syöntikypsä Avokado piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.6
+      }
+    ]
+  },
+  {
+    "name": "Punasipuli piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.22
+      }
+    ]
+  },
+  {
+    "name": "Omena Red Del piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.5
+      }
+    ]
+  },
+  {
+    "name": "Kurkku 300g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.49
+      }
+    ]
+  },
+  {
+    "name": "Maustekurkku piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.77
+      }
+    ]
+  },
+  {
+    "name": "Järvikylä Tilli Ruukku pack",
+    "category": "Other",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.79
+      }
+    ]
+  },
+  {
+    "name": "Porkkana 500g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.89
+      }
+    ]
+  },
+  {
+    "name": "Lime piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.31
+      }
+    ]
+  },
+  {
+    "name": "Annabelle Peruna 1kg",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.29
+      }
+    ]
+  },
+  {
+    "name": "Jäävuorisalaatti piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 2.09
+      }
+    ]
+  },
+  {
+    "name": "Pensasmustikka 300g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 4.99
+      }
+    ]
+  },
+  {
+    "name": "Kirsikkatomaatti 250g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.99
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 1.39
+      },
+      {
+        "store": "K-Citymarket",
+        "price": 2.79
+      }
+    ]
+  },
+  {
+    "name": "Kiivi 500g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.49
+      }
+    ]
+  },
+  {
+    "name": "Golden Delicious Omena piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.42
+      }
+    ]
+  },
+  {
+    "name": "Bataatti piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.9
+      }
+    ]
+  },
+  {
+    "name": "Omena Idared piece",
+    "category": "Fruits",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.2
+      }
+    ]
+  },
+  {
+    "name": "Paprika 300g 2 Kpl",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 2.79
+      }
+    ]
+  },
+  {
+    "name": "Espanjalainen Parsakaali 400g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.49
+      }
+    ]
+  },
+  {
+    "name": "Inkivääri piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.89
+      }
+    ]
+  },
+  {
+    "name": "Pensasmustikka 125g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 1.49
+      }
+    ]
+  },
+  {
+    "name": "Syöntikypsä Pikkuavokado 500g",
+    "category": "Fruits",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 3.49
+      }
+    ]
+  },
+  {
+    "name": "Kevätsipuli 100g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 2.39
+      }
+    ]
+  },
+  {
+    "name": "Paprika Punainen piece",
+    "category": "Vegetables",
+    "unit": "piece",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.75
+      },
+      {
+        "store": "S-Market",
+        "price": 1.3
+      }
+    ]
+  },
+  {
+    "name": "Keltasipuli 350g",
+    "category": "Vegetables",
+    "unit": "pack",
+    "prices": [
+      {
+        "store": "K-Citymarket",
+        "price": 0.99
+      }
+    ]
+  },
+  {
+    "name": "Klementtiini",
+    "category": "Other",
+    "unit": "kpl",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.33
+      }
+    ]
+  },
+  {
+    "name": "Omena Red Delicious",
+    "category": "Fruits",
+    "unit": "kpl",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.71
+      }
+    ]
+  },
+  {
+    "name": "Batatti",
+    "category": "Other",
+    "unit": "kpl",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.47
+      }
+    ]
+  },
+  {
+    "name": "Porkkaana 2",
+    "category": "Other",
+    "unit": "kg",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.69
+      }
+    ]
+  },
+  {
+    "name": "Veriappelsiini 1",
+    "category": "Fruits",
+    "unit": "kg",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 2.59
+      }
+    ]
+  },
+  {
+    "name": "Mandariini Mandared",
+    "category": "Fruits",
+    "unit": "kpl",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.47
+      }
+    ]
+  },
+  {
+    "name": "Tumma Siemenetön Viinirypäle 500g",
+    "category": "Fruits",
+    "unit": "500g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 3.69
+      }
+    ]
+  },
+  {
+    "name": "Kevytmaito 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.95
+      }
+    ]
+  },
+  {
+    "name": "Laktoositon Kevytmaitojuoma 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.29
+      }
+    ]
+  },
+  {
+    "name": "Rasvaton Maito 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 0.85
+      }
+    ]
+  },
+  {
+    "name": "Täysmaito 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.39
+      }
+    ]
+  },
+  {
+    "name": "Laktoositon 3 Maitojuoma 1l Esl",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.55
+      }
+    ]
+  },
+  {
+    "name": "Laktoositon 1l Rasvaton Maitojuoma",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.29
+      }
+    ]
+  },
+  {
+    "name": "Oatly Ikaffe Kaurajuoma 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.95
+      }
+    ]
+  },
+  {
+    "name": "Elovena 1l Kaurajuoma Kahviin",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.99
+      }
+    ]
+  },
+  {
+    "name": "Oddlygood Barista Kaurajuoma 1l Uht Gluteeniton",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.89
+      }
+    ]
+  },
+  {
+    "name": "1l Kaurajuoma Uht",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.19
+      }
+    ]
+  },
+  {
+    "name": "Barista Kaurajuoma 1l",
+    "category": "Dairy",
+    "unit": "1L",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 1.59
+      }
+    ]
+  },
+  {
+    "name": "Paulig Juhla Mokka Kahvi Suodatinjauhatus 500g",
+    "category": "Beverages",
+    "unit": "500g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 9.35
+      }
+    ]
+  },
+  {
+    "name": "Kulta Katriina Perinteinen Kahvi Suodatinjauhatus 500g",
+    "category": "Beverages",
+    "unit": "500g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 8.99
+      }
+    ]
+  },
+  {
+    "name": "Snellman Kevyt Nautaherne Jauhis 75 400g",
+    "category": "Other",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 4.69
+      }
+    ]
+  },
+  {
+    "name": "Atria Parempi Nauta Jauheliha 10 400g",
+    "category": "Meat",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 5.35
+      }
+    ]
+  },
+  {
+    "name": "Sikanauta Jauheliha 23 400g",
+    "category": "Meat",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 2.6
+      }
+    ]
+  },
+  {
+    "name": "Naudan Jauheliha 17 600g",
+    "category": "Meat",
+    "unit": "600g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 5.09
+      }
+    ]
+  },
+  {
+    "name": "Kanan Jauheliha 4 400g",
+    "category": "Meat",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 2.99
+      }
+    ]
+  },
+  {
+    "name": "Riimin Savumuikut 400g",
+    "category": "Other",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 9.25
+      }
+    ]
+  },
+  {
+    "name": "Riimin Savulohi 400g",
+    "category": "Fish",
+    "unit": "400g",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 8.95
+      }
+    ]
+  },
+  {
+    "name": "Rummo Spaghetti No 3 1kg",
+    "category": "Pantry",
+    "unit": "1kg",
+    "prices": [
+      {
+        "store": "S-Market",
+        "price": 3.49
+      }
+    ]
+  }
+];
 
-    // Add current prices for all products in all stores
     let priceCount = 0;
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      const productId = productIds[i];
+    for (const item of priceData) {
+      const key = `${item.name}|${item.category}|${item.unit}`;
+      const productId = productIds[key];
 
-      for (const storeName of stores) {
-        const storeId = storeIds[storeName];
-        const basePrice = generatePrice(product.category);
+      if (!productId) continue;
 
-        // Add small variation between stores (-10% to +15%)
-        const variation = 0.9 + Math.random() * 0.25;
-        const price = Math.round(basePrice * variation * 100) / 100;
+      for (const priceInfo of item.prices) {
+        const storeId = storeIds[priceInfo.store];
+        if (!storeId) continue;
 
-        await db.addPrice(productId, storeId, price);
+        const priceCents = Math.round(priceInfo.price * 100);
+
+        await sql`
+          INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+          VALUES (${productId}, ${storeId}, ${priceCents}, CURRENT_TIMESTAMP)
+        `;
+
         priceCount++;
       }
     }
 
-    console.log(`✓ Added ${priceCount} current price entries`);
+    console.log(`  ✓ Inserted ${priceCount} real prices`);
 
-    // Add historical data (simulate price changes over past months)
-    console.log('Adding historical price data...');
-    const monthsAgo = [30, 60, 90, 120, 150, 180]; // 1-6 months ago
+    // Add Prisma prices (same as S-Market)
+    console.log('\nAdding Prisma prices (same chain as S-Market)...');
+    for (const item of priceData) {
+      const key = `${item.name}|${item.category}|${item.unit}`;
+      const productId = productIds[key];
 
-    let historicalCount = 0;
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      const productId = productIds[i];
+      if (!productId) continue;
 
-      for (const daysAgo of monthsAgo) {
-        for (const storeName of stores) {
-          const storeId = storeIds[storeName];
-          const basePrice = generatePrice(product.category);
+      for (const priceInfo of item.prices) {
+        if (priceInfo.store !== 'S-Market') continue;
 
-          // Simulate price inflation over time (prices were slightly lower before)
-          const inflationFactor = 1 - (daysAgo / 365) * 0.05; // ~5% annual increase
-          const variation = 0.9 + Math.random() * 0.25;
-          const price = Math.round(basePrice * variation * inflationFactor * 100) / 100;
+        const storeId = storeIds['Prisma'];
+        if (!storeId) continue;
 
-          // Insert with historical date
-          await db.sql`
-            INSERT INTO prices (product_id, store_id, price, recorded_at)
-            VALUES (${productId}, ${storeId}, ${price}, NOW() - INTERVAL '${daysAgo} days')
-          `;
-          historicalCount++;
-        }
+        const priceCents = Math.round(priceInfo.price * 100);
+
+        await sql`
+          INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+          VALUES (${productId}, ${storeId}, ${priceCents}, CURRENT_TIMESTAMP)
+        `;
       }
     }
 
-    console.log(`✓ Added ${historicalCount} historical price entries`);
-    console.log('✓ Database is ready to use');
+    // Add sample prices for stores without real data
+    console.log('\nAdding sample prices for other stores...');
+    const otherStores = stores.filter(s => s !== 'K-Citymarket' && s !== 'S-Market' && s !== 'Prisma');
 
-    process.exit(0);
+    for (const item of priceData) {
+      const key = `${item.name}|${item.category}|${item.unit}`;
+      const productId = productIds[key];
+
+      if (!productId || item.prices.length === 0) continue;
+
+      // Use average of real prices as base
+      const avgPrice = item.prices.reduce((sum, p) => sum + p.price, 0) / item.prices.length;
+
+      for (const storeName of otherStores) {
+        const storeId = storeIds[storeName];
+        if (!storeId) continue;
+
+        // Vary price by ±15%
+        const variation = 0.85 + Math.random() * 0.3;
+        const estimatedPrice = avgPrice * variation;
+        const priceCents = Math.round(estimatedPrice * 100);
+
+        await sql`
+          INSERT INTO prices (product_id, store_id, price_cents, recorded_at)
+          VALUES (${productId}, ${storeId}, ${priceCents}, CURRENT_TIMESTAMP)
+        `;
+      }
+    }
+
+    console.log('  ✓ Added sample prices for other stores');
+
+    console.log('\n✅ Seed completed successfully!');
+    console.log(`   Products: ${products.length}`);
+    console.log(`   Stores: ${stores.length}`);
+    console.log(`   Real prices: ${priceCount}`);
+
   } catch (error) {
-    console.error('Error seeding database:', error);
-    process.exit(1);
+    console.error('❌ Seed failed:', error);
+    throw error;
   }
 }
 
-// Run seed
-seedDatabase();
+// Run if called directly
+if (require.main === module) {
+  seed()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
+
+module.exports = { seed };
