@@ -49,6 +49,19 @@
         <button onclick="seed()" disabled id="seedBtn">Step 2: Seed Database</button>
     </div>
 
+    <div class="section">
+        <h2>3. Price Management</h2>
+        <p>Fetch or import prices</p>
+        <button onclick="fetchPrices()">Fetch from Stores</button>
+        <button onclick="importSamplePrices()">Import Sample Prices</button>
+    </div>
+
+    <div class="section">
+        <h2>4. Health Check</h2>
+        <p>Verify API status</p>
+        <button onclick="checkHealth()">Check Health</button>
+    </div>
+
     <div id="output"></div>
 
     <script>
@@ -166,6 +179,82 @@
 
                 // Disable seed button
                 document.getElementById('seedBtn').disabled = true;
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function fetchPrices() {
+            output.textContent = 'Fetching prices from stores...\n';
+            log('This may take 1-5 minutes...\n');
+
+            try {
+                const response = await fetch('/api/fetch-prices', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (data.summary) {
+                    log('=== FETCH COMPLETE ===\n');
+                    log(`Fetched: ${data.summary.total_fetched || 0} products`);
+                    log(`Updated: ${data.summary.total_updated || 0} prices`);
+                    log(`Errors: ${data.summary.errors?.length || 0}`);
+
+                    if (data.summary.errors && data.summary.errors.length > 0) {
+                        log('\nErrors:');
+                        data.summary.errors.forEach(err => log(`  - ${err}`));
+                    }
+                } else {
+                    log('ERROR: ' + (data.error || 'Unknown error'));
+                }
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function importSamplePrices() {
+            output.textContent = 'Importing sample prices...\n';
+
+            try {
+                const sampleResponse = await fetch('/sample-prices.json');
+                const sampleData = await sampleResponse.json();
+
+                const response = await fetch('/api/import-prices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sampleData)
+                });
+
+                const data = await response.json();
+
+                log('=== IMPORT COMPLETE ===\n');
+                log(`Total: ${data.total || 0}`);
+                log(`Updated: ${data.updated || 0}`);
+                log(`Failed: ${data.failed || 0}`);
+
+            } catch (error) {
+                log(`ERROR: ${error.message}`);
+            }
+        }
+
+        async function checkHealth() {
+            output.textContent = 'Checking health...\n';
+
+            try {
+                const [health, products, stores] = await Promise.all([
+                    fetch('/api/health').then(r => r.json()),
+                    fetch('/api/products').then(r => r.json()),
+                    fetch('/api/stores').then(r => r.json())
+                ]);
+
+                log('=== HEALTH CHECK ===\n');
+                log(`API: ${health.message || 'OK'}`);
+                log(`Products: ${products.length || 0}`);
+                log(`Stores: ${stores.length || 0}`);
+                log('\n✓ All systems operational');
 
             } catch (error) {
                 log(`ERROR: ${error.message}`);

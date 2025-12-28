@@ -212,9 +212,10 @@ module.exports = async (req, res) => {
     const pricePromises = [];
     for (const product of productIds) {
       for (const storeName of stores) {
-        const price = generatePrice(product.priceRange[0], product.priceRange[1]);
+        const priceEuros = generatePrice(product.priceRange[0], product.priceRange[1]);
+        const priceCents = Math.round(parseFloat(priceEuros) * 100);
         pricePromises.push(
-          db.sql`INSERT INTO prices (product_id, store_id, price) VALUES (${product.id}, ${storeIds[storeName]}, ${price})`
+          db.sql`INSERT INTO prices (product_id, store_id, price_cents) VALUES (${product.id}, ${storeIds[storeName]}, ${priceCents})`
         );
         results.currentPrices++;
       }
