@@ -332,6 +332,22 @@ function renderProducts() {
             </tr>
         `;
     }).join('');
+
+    // Add click handlers for mobile tooltips
+    setTimeout(() => {
+        document.querySelectorAll('.price-diff-badge').forEach(badge => {
+            badge.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Toggle tooltip
+                badge.classList.toggle('show-tooltip');
+
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    badge.classList.remove('show-tooltip');
+                }, 3000);
+            });
+        });
+    }, 0);
 }
 
 // Generate ASCII bar chart with dual metrics

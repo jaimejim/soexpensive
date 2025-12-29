@@ -502,27 +502,32 @@ tr.biggest-difference:hover {
 }
 
 /* Mobile-friendly: show tooltip on touch/click */
-@media (hover: none) {
-    .price-diff-badge::after {
-        content: attr(data-mobile-text);
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--text-color);
-        color: var(--background-color);
-        padding: var(--space-1) var(--space-2);
-        border-radius: 3px;
-        font-size: 0.75rem;
-        white-space: nowrap;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.2s;
-        margin-bottom: 4px;
-        z-index: 100;
-    }
+.price-diff-badge::after {
+    content: attr(data-mobile-text);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text-color);
+    color: var(--background-color);
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-bottom: 4px;
+    z-index: 100;
+}
 
-    .price-diff-badge:active::after {
+.price-diff-badge.show-tooltip::after {
+    opacity: 1;
+}
+
+/* Desktop hover */
+@media (hover: hover) {
+    .price-diff-badge:hover::after {
         opacity: 1;
     }
 }
@@ -545,7 +550,7 @@ tr.biggest-difference:hover {
 
     .header-right {
         padding: var(--space-2);
-        gap: var(--space-2);
+        gap: var(--space-1);
         min-height: auto;
     }
 
@@ -554,7 +559,7 @@ tr.biggest-difference:hover {
     }
 
     .insight-item {
-        gap: 4px;
+        gap: 2px;
     }
 
     .insight-label {
