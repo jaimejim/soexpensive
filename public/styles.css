@@ -488,7 +488,7 @@ tr.biggest-difference:hover {
 
 .price-diff-badge {
     display: inline-block;
-    padding: 2px 6px;
+    padding: 0 6px;
     margin-left: var(--space-1);
     font-size: 0.75rem;
     background: var(--accent-muted-red);
@@ -497,6 +497,8 @@ tr.biggest-difference:hover {
     font-weight: bold;
     cursor: help;
     position: relative;
+    vertical-align: baseline;
+    line-height: 1.4;
 }
 
 /* Mobile-friendly: show tooltip on touch/click */
