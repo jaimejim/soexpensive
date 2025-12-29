@@ -17,8 +17,9 @@
 ### Important Constraints
 - ❌ **No manual data entry** - Automation required
 - ❌ **No paid services** - Free tier only
-- ❌ **No web scraping yet** - Blocked by stores, using sample data
-- ✅ **One real data source:** K-Citymarket CSV (manual collection for now)
+- ❌ **No web scraping yet** - Blocked by stores, using manual collection
+- ✅ **Real data sources:** K-Citymarket (269 products), S-Market (37 products)
+- ✅ **Database loads from CSV** - products-prices.csv in repo (306 products total)
 - ✅ **Monospace terminal aesthetic** - Design principle to maintain
 
 ---
@@ -67,9 +68,12 @@ soexpensive/
 │   └── reset.css          # CSS reset
 ├── server.js              # Express app (171 lines)
 ├── db.js                  # PostgreSQL layer (204 lines)
-├── seed.js                # Local seeding script (224 lines)
-├── prices.csv             # Real K-Citymarket prices (37 products)
-├── sample-prices.json     # Sample data for other stores
+├── products-prices.csv    # ✅ MASTER DATA FILE (306 products, real prices)
+├── data/                  # Raw scraped data (for reference)
+│   ├── k-citymarket.csv
+│   └── s-market.txt
+├── scripts/               # Data processing scripts
+│   └── parse-scraped-data.js
 ├── vercel.json            # Vercel config
 └── package.json           # Dependencies
 ```
@@ -144,9 +148,12 @@ CREATE INDEX idx_prices_product_store
 6. Alepa
 
 **Data Quality Status:**
-- ✅ **K-Citymarket:** Real prices from CSV (37 products, collected 2025-12-28)
-- ⚠️ **All Others:** Sample/estimate data (not accurate)
-- 📊 **Total Products:** 67 across 14 categories
+- ✅ **K-Citymarket:** Real prices (269 products, collected 2025-12-28)
+- ✅ **S-Market:** Real prices (37 products, collected 2025-12-28)
+- ✅ **Prisma:** Uses S-Market prices (same chain, 37 products)
+- ⚠️ **K-Supermarket, Lidl, Alepa:** Estimated (±15% variation from real data average)
+- 📊 **Total Products:** 306 products from products-prices.csv
+- 📊 **Real Prices:** K-Citymarket (269) + S-Market (37) = 306 verified prices
 
 ### Data Collection Approaches (Attempted)
 
@@ -156,34 +163,49 @@ CREATE INDEX idx_prices_product_store
 - **Blocker:** Vercel free tier timeout (10s) too short
 - **Status:** Abandoned for now
 
-**2. Manual CSV Collection** ✅ CURRENT
-- **How:** Manually collect prices, format as CSV
-- **Format:** `product_name,price_cents,store_name,updated`
-- **Issues:** Not sustainable, time-consuming
-- **Status:** Used for K-Citymarket data
+**2. Manual CSV Collection** ✅ CURRENT METHOD
+- **How:** Manually collect prices, add to products-prices.csv in repo
+- **Format:** `store,product,category,unit,price_euros`
+- **Database loads from:** products-prices.csv on every seed
+- **Status:** Active - all data comes from this CSV
 
-**3. Claude Browser Extension** 🔄 EXPLORING
-- **Idea:** Use Claude Computer Use to navigate store websites
-- **Workflow:** Generate structured CSV from browser session
-- **Status:** Being tested by user
+**3. Claude Browser Extension** ✅ USED
+- **How:** Claude Computer Use navigates store websites
+- **Workflow:** Generate structured data → update products-prices.csv
+- **Status:** Successfully collected K-Citymarket and S-Market data
 
-### CSV Data Format
+### Master CSV Data Format (products-prices.csv)
 
-**User's Scraped Data Format:**
-```
-PRODUCT NAME | PRICE (€/unit) | PRICE (€/kg)
-Pirkka banaani | 0.30 | 1.69
-Kurkku Suomi | 0.70 | 1.99
-```
-
-**Current Import Format (prices.csv):**
+**Format:**
 ```csv
-product_name,price_cents,store_name,updated
-Maito,99,K-Citymarket,2025-12-28
-Leipä,135,K-Citymarket,2025-12-28
+store,product,category,unit,price_euros
+K-Citymarket,Banaani,Fruits,kg,1.69
+S-Market,Kurkku,Vegetables,kpl,1.23
+K-Citymarket,Tomaatti,Vegetables,kg,2.99
 ```
 
-**Note:** Need to build CSV parser for user's scraped format (pipe-delimited, euros not cents)
+**Key Points:**
+- ✅ Normalized product names (no brands: Pirkka, Coop, etc.)
+- ✅ Prices in euros (converted to cents in DB)
+- ✅ All products deduplicated by (product, category, unit)
+- ✅ Database seeding: `/api/seed` reads this CSV
+- ✅ Single source of truth in repo
+
+### How to Add/Update Products
+
+**Option 1: Edit CSV Directly**
+1. Edit `products-prices.csv`
+2. Add line: `K-Citymarket,NewProduct,Category,unit,price`
+3. Push to repo
+4. Visit `/api/cleanup` then `/api/seed`
+5. Done!
+
+**Option 2: Import via Admin Panel**
+1. Go to `/admin`
+2. Paste scraped data (pipe-delimited format)
+3. Click "Import CSV"
+4. Manually update products-prices.csv with new products
+5. Commit and push
 
 ---
 
