@@ -8,8 +8,8 @@
     --space-2: 12px;
     --space-3: 18px;
     --space-4: 24px;
-    --accent-blue: #5698D1;
-    --accent-muted-red: #8A4F55;
+    --accent-ocean: #00B4D8;  /* Bright ocean blue */
+    --accent-coral: #F77F00;  /* Vibrant coral orange */
 }
 
 /* Dark mode improved contrast */
@@ -263,7 +263,7 @@ hr {
 
 .price.cheapest {
     font-weight: var(--font-weight-bold);
-    color: var(--accent-blue);
+    color: var(--accent-ocean);
 }
 
 .price.cheapest::before {
@@ -278,7 +278,7 @@ hr {
 /* ═══ 8. Store Rankings ═══ */
 .rank-1 {
     font-weight: var(--font-weight-bold);
-    color: var(--accent-blue);
+    color: var(--accent-ocean);
 }
 
 .rank-1::before {
@@ -345,7 +345,7 @@ figcaption {
 
 /* Price freshness indicators */
 sup.verified-indicator {
-    color: var(--accent-blue);
+    color: var(--accent-ocean);
     font-size: 0.7rem;
     margin-left: 0.1rem;
     opacity: 0.8;
@@ -416,13 +416,13 @@ th.sortable:hover::after {
 th.sortable.sort-asc::after {
     content: '▲';
     opacity: 1;
-    color: var(--accent-blue);
+    color: var(--accent-ocean);
 }
 
 th.sortable.sort-desc::after {
     content: '▼';
     opacity: 1;
-    color: var(--accent-blue);
+    color: var(--accent-ocean);
 }
 
 /* Cursor blink animation for inputs */
@@ -434,7 +434,7 @@ textarea:focus {
 
 @keyframes cursor-blink {
     0%, 50% { border-color: var(--text-color); }
-    51%, 100% { border-color: var(--accent-blue); }
+    51%, 100% { border-color: var(--accent-ocean); }
 }
 
 /* Spinner animation (replaces skeleton loaders) */
@@ -479,11 +479,11 @@ textarea:focus {
 
 /* Price difference highlights */
 tr.biggest-difference {
-    background-color: rgba(138, 79, 85, 0.1) !important;
+    background-color: rgba(247, 127, 0, 0.1) !important;
 }
 
 tr.biggest-difference:hover {
-    background-color: rgba(138, 79, 85, 0.15) !important;
+    background-color: rgba(247, 127, 0, 0.15) !important;
 }
 
 .price-diff-badge {
@@ -491,7 +491,7 @@ tr.biggest-difference:hover {
     padding: 0 6px;
     margin-left: var(--space-1);
     font-size: 0.75rem;
-    background: var(--accent-muted-red);
+    background: var(--accent-coral);
     color: #fff;
     border-radius: 3px;
     font-weight: bold;
