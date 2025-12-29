@@ -2,6 +2,8 @@
 let allProducts = [];
 let allStores = [];
 let currentTheme = 'light';
+let sortColumn = 'name';
+let sortDirection = 'asc';
 
 // Store names in order
 const STORE_ORDER = ['S-Market', 'Prisma', 'K-Citymarket', 'K-Supermarket', 'Lidl', 'Alepa'];
@@ -167,6 +169,14 @@ function setupEventListeners() {
     if (themeToggle) {
         themeToggle.addEventListener('change', toggleTheme);
     }
+
+    // Add sorting event listeners to table headers
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+            handleSort(column);
+        });
+    });
 }
 
 // Debounce function
@@ -182,6 +192,26 @@ function debounce(func, wait) {
     };
 }
 
+// Handle column sorting
+function handleSort(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+
+    // Update UI indicators
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.sort === column) {
+            th.classList.add(`sort-${sortDirection}`);
+        }
+    });
+
+    renderProducts();
+}
+
 // Filter and sort products
 function getFilteredProducts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -191,10 +221,48 @@ function getFilteredProducts() {
         return matchesSearch;
     });
 
-    // Sort by name by default
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort based on current sort column and direction
+    filtered.sort((a, b) => {
+        let aVal, bVal;
+
+        if (sortColumn === 'name' || sortColumn === 'category' || sortColumn === 'unit') {
+            // Text sorting
+            aVal = a[sortColumn];
+            bVal = b[sortColumn];
+            const comparison = aVal.localeCompare(bVal);
+            return sortDirection === 'asc' ? comparison : -comparison;
+        } else if (sortColumn === 'best') {
+            // Sort by minimum price
+            aVal = getMinPrice(a);
+            bVal = getMinPrice(b);
+        } else {
+            // Sort by store price
+            aVal = a.prices[sortColumn]?.price ?? Infinity;
+            bVal = b.prices[sortColumn]?.price ?? Infinity;
+        }
+
+        const comparison = aVal - bVal;
+        return sortDirection === 'asc' ? comparison : -comparison;
+    });
 
     return filtered;
+}
+
+// Calculate products with biggest price differences
+function getProductsWithBiggestDifferences(products) {
+    const productsWithDiff = products
+        .map(product => {
+            const minPrice = getMinPrice(product);
+            const maxPrice = getMaxPrice(product);
+            const difference = maxPrice - minPrice;
+            const percentDiff = minPrice > 0 ? ((difference / minPrice) * 100) : 0;
+            return { product, difference, percentDiff };
+        })
+        .filter(item => item.difference > 0)
+        .sort((a, b) => b.percentDiff - a.percentDiff)
+        .slice(0, 10); // Top 10
+
+    return new Set(productsWithDiff.map(item => item.product.name));
 }
 
 // Get minimum price for a product (uses pre-calculated value)
@@ -222,9 +290,16 @@ function renderProducts() {
         return;
     }
 
+    // Calculate products with biggest differences
+    const biggestDiffs = getProductsWithBiggestDifferences(products);
+
     tbody.innerHTML = products.map(product => {
         const cheapestStore = getCheapestStore(product);
         const minPrice = getMinPrice(product);
+        const maxPrice = getMaxPrice(product);
+        const difference = maxPrice - minPrice;
+        const percentDiff = minPrice > 0 ? ((difference / minPrice) * 100) : 0;
+        const isBiggestDiff = biggestDiffs.has(product.name);
 
         const priceColumns = STORE_ORDER.map(store => {
             const priceData = product.prices[store];
@@ -243,9 +318,12 @@ function renderProducts() {
             return `<td class="price ${priceClass}">€${priceData.price.toFixed(2)}${indicator}</td>`;
         }).join('');
 
+        const diffBadge = isBiggestDiff ? `<span class="price-diff-badge" title="Price varies by ${percentDiff.toFixed(0)}%">+${percentDiff.toFixed(0)}%</span>` : '';
+        const rowClass = isBiggestDiff ? 'biggest-difference' : '';
+
         return `
-            <tr>
-                <td><strong>${product.name}</strong></td>
+            <tr class="${rowClass}">
+                <td><strong>${product.name}</strong>${diffBadge}</td>
                 <td>${product.category}</td>
                 <td>${product.unit}</td>
                 ${priceColumns}
