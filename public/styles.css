@@ -8,8 +8,8 @@
     --space-2: 12px;
     --space-3: 18px;
     --space-4: 24px;
-    --accent-green: #4ecdc4;
-    --accent-red: #ff6b6b;
+    --accent-blue: #5698D1;
+    --accent-muted-red: #8A4F55;
 }
 
 /* Dark mode improved contrast */
@@ -259,12 +259,11 @@ hr {
 .price {
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: var(--text-color-alt);
 }
 
 .price.cheapest {
     font-weight: var(--font-weight-bold);
-    color: var(--accent-green);
+    color: var(--accent-blue);
 }
 
 .price.cheapest::before {
@@ -279,7 +278,7 @@ hr {
 /* ═══ 8. Store Rankings ═══ */
 .rank-1 {
     font-weight: var(--font-weight-bold);
-    color: var(--accent-green);
+    color: var(--accent-blue);
 }
 
 .rank-1::before {
@@ -346,7 +345,7 @@ figcaption {
 
 /* Price freshness indicators */
 sup.verified-indicator {
-    color: #2a9d8f;
+    color: var(--accent-blue);
     font-size: 0.7rem;
     margin-left: 0.1rem;
     opacity: 0.8;
@@ -417,13 +416,13 @@ th.sortable:hover::after {
 th.sortable.sort-asc::after {
     content: '▲';
     opacity: 1;
-    color: var(--accent-green);
+    color: var(--accent-blue);
 }
 
 th.sortable.sort-desc::after {
     content: '▼';
     opacity: 1;
-    color: var(--accent-green);
+    color: var(--accent-blue);
 }
 
 /* Cursor blink animation for inputs */
@@ -435,7 +434,7 @@ textarea:focus {
 
 @keyframes cursor-blink {
     0%, 50% { border-color: var(--text-color); }
-    51%, 100% { border-color: var(--accent-green); }
+    51%, 100% { border-color: var(--accent-blue); }
 }
 
 /* Spinner animation (replaces skeleton loaders) */
@@ -480,12 +479,11 @@ textarea:focus {
 
 /* Price difference highlights */
 tr.biggest-difference {
-    background-color: rgba(255, 107, 107, 0.1) !important;
-    border-left: 3px solid var(--accent-red);
+    background-color: rgba(138, 79, 85, 0.1) !important;
 }
 
 tr.biggest-difference:hover {
-    background-color: rgba(255, 107, 107, 0.15) !important;
+    background-color: rgba(138, 79, 85, 0.15) !important;
 }
 
 .price-diff-badge {
@@ -493,7 +491,7 @@ tr.biggest-difference:hover {
     padding: 2px 6px;
     margin-left: var(--space-1);
     font-size: 0.75rem;
-    background: var(--accent-red);
+    background: var(--accent-muted-red);
     color: #fff;
     border-radius: 3px;
     font-weight: bold;
