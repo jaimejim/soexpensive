@@ -318,7 +318,8 @@ function renderProducts() {
             return `<td class="price ${priceClass}">€${priceData.price.toFixed(2)}${indicator}</td>`;
         }).join('');
 
-        const diffBadge = isBiggestDiff ? `<span class="price-diff-badge" title="Big price difference! Cheapest: €${minPrice.toFixed(2)}, Most expensive: €${maxPrice.toFixed(2)} (+${percentDiff.toFixed(0)}%)">+${percentDiff.toFixed(0)}%</span>` : '';
+        const tooltipText = `€${minPrice.toFixed(2)} → €${maxPrice.toFixed(2)}`;
+        const diffBadge = isBiggestDiff ? `<span class="price-diff-badge" title="Big price difference! Cheapest: €${minPrice.toFixed(2)}, Most expensive: €${maxPrice.toFixed(2)} (+${percentDiff.toFixed(0)}%)" data-mobile-text="${tooltipText}">+${percentDiff.toFixed(0)}%</span>` : '';
         const rowClass = isBiggestDiff ? 'biggest-difference' : '';
 
         return `
