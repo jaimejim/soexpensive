@@ -362,25 +362,12 @@ sup.estimate-indicator {
 /* ═══ 10. Responsive ═══ */
 /* ═══ Enhanced Visual Elements ═══ */
 
-/* Section borders (ASCII style) */
+/* Section borders (simple) */
 .chart-section,
 .products-section {
     border: 1px solid var(--border-color);
     padding: var(--space-3);
     margin-bottom: var(--space-4);
-    position: relative;
-}
-
-.chart-section::before,
-.products-section::before {
-    content: '┌' attr(data-title) '┐';
-    position: absolute;
-    top: -1px;
-    left: var(--space-2);
-    background: var(--background-color);
-    padding: 0 var(--space-1);
-    font-size: 0.9rem;
-    color: var(--text-color-alt);
 }
 
 /* Table hover effects */
